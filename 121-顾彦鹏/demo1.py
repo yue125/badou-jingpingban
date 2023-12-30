@@ -9,13 +9,7 @@ import random
 import json
 import matplotlib.pyplot as plt
 
-"""
 
-基于pytorch框架编写模型训练
-实现一个自行构造的找规律(机器学习)任务
-规律：x是一个5维向量，如果第1个数>第5个数，则为正样本，反之为负样本
-
-"""
 
 
 class TorchModel(nn.Module):
@@ -34,8 +28,7 @@ class TorchModel(nn.Module):
             return torch.softmax(y_pred, dim=1)
 
 
-# 生成一个样本, 样本的生成方法，代表了我们要学习的规律
-# 随机生成一个5维向量，如果第一个值大于第五个值，认为是正样本，反之为负样本
+
 def build_sample():
     x = np.random.random(5)  
     label = np.random.randint(0, 3)  

@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split #Split dataset
 #Request - Building a Multiple Classification Task
  
 # 1) Loading Data
-data = pd.read_csv('/Users/henryzheng/Desktop/forestfires.csv')
+data = pd.read_csv('Desktop/forestfires.csv')
 data['area'].describe()
 #Accoring to Data distribution, in this task, choice item - area as Multiple Classification(True - y)
 # Low fire area - area < 5 ----- 0
@@ -21,7 +21,7 @@ data['area'].describe()
 
 # 2）Preparing Data
 
-df = pd.read_csv('/Users/henryzheng/Desktop/forestfires.csv')
+df = pd.read_csv('Desktop/forestfires.csv')
 def classification_data(row):
     if row['area'] > 10:
         return 2

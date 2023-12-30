@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # 1.先准备数据集及其标签
 # 随机生成一个5维向量，用第1维向量与其他维向量比较
-
+# 测试Git
 
 def build_sample():
     x = np.random.random(5)

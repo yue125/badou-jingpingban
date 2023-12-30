@@ -36,14 +36,14 @@ class TorchModel(nn.Module):
         self.linear1 = nn.Linear(input_size,5)
         # self.linear2 = nn.Linear(3,5)
         # self.linear3 = nn.Linear(8,5)
-        self.activation = torch.sigmoid
+        # self.activation = torch.sigmoid
         self.loss = nn.functional.cross_entropy
 
     def forward(self,x,y=None):
-        x1 = self.linear1(x)
+        y_pred = self.linear1(x)
         # x2 = self.linear2(x1)
         # x3 = self.linear3(x2)
-        y_pred = self.activation(x1)
+        # y_pred = self.activation(x1)
         # print('预测值00：',y_pred[0][0])
         # if y_pred[0][0] >= 1:
         #

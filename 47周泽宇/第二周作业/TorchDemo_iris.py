@@ -47,9 +47,10 @@ class TorchModel(nn.Module):
         super(TorchModel, self).__init__()
         # 定义第一个全连接层
         # input_size:输入的神经元个数/输入特征的维度/输入数据的特征数量 128:
-        self.linear1 = nn.Linear(input_size, 128)
+        self.linear1 = nn.Linear(input_size, 32)
+        self.linear2 = nn.Linear(32,64)
         # 定义第二个全连接层 输入维度和上一个全连接层的输出相同 输出维度是我们的分类类别数
-        self.linear2 = nn.Linear(128, class_num)
+        self.linear3 = nn.Linear(64, class_num)
         # 在答案中也可以只设置一个线性层 直接设置输出维度为class_num即可
         """
         # self.linear = nn.Linear(input_size, 1)
@@ -75,6 +76,7 @@ class TorchModel(nn.Module):
         # x = self.activation(x, dim=-1)
         x = self.linear1(x)  # (batch_size, input_size) -> (batch_size, 128)
         x = self.linear2(x)  # (batch_size, 128) -> (batch_size, 4)
+        x = self.linear3(x)
         y_pred = self.activation(x, dim=-1) # softmax函数 dim=-1会对最后输入的维度进行操作
         # y_pred = self.activation(x)  # (batch_size, 1) -> (batch_size, 1)
         if y is not None:

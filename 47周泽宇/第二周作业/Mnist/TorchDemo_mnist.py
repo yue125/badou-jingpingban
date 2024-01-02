@@ -119,11 +119,11 @@ def evaluate(model):
 
 def main():
     # 配置参数
-    epoch_num = 1000  # 训练轮数
-    batch_size = 15  # 每次训练样本个数
+    epoch_num = 300  # 训练轮数
+    batch_size = 25  # 每次训练样本个数
     train_sample = 50  # 每轮训练总共训练的样本总数
     input_size = 784  # 输入向量维度 输入为图片格式28*28 拉伸为一维784
-    learning_rate = 0.001  # 学习率
+    learning_rate = 0.0005  # 学习率
     class_num = 10
     print("训练集总大小:", len(X_train))
     # 建立模型

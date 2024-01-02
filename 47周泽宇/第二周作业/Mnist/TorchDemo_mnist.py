@@ -119,11 +119,11 @@ def evaluate(model):
 
 def main():
     # 配置参数
-    epoch_num = 500  # 训练轮数
-    batch_size = 50  # 每次训练样本个数
+    epoch_num = 1000  # 训练轮数
+    batch_size = 15  # 每次训练样本个数
     train_sample = 50  # 每轮训练总共训练的样本总数
     input_size = 784  # 输入向量维度 输入为图片格式28*28 拉伸为一维784
-    learning_rate = 0.0005  # 学习率
+    learning_rate = 0.001  # 学习率
     class_num = 10
     print("训练集总大小:", len(X_train))
     # 建立模型
@@ -133,12 +133,16 @@ def main():
     log = []
 
     # 训练过程
+
+    # 每次随机抽取batch_size个 shuffle=True每次会随机打乱抽取
+    # 训练时定义的DataLoader应该是放在两重循环外而不是循环内部。
+    test_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+
     for epoch in range(epoch_num):
         model.train()
         watch_loss = []
         for batch_index in range(train_sample // batch_size):
-            # 每次随机抽取batch_size个 shuffle=True每次会随机打乱抽取
-            test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
             # 从DataLoader中获取一个batch的数据
             x, y = next(iter(test_loader))
             print("x=", x.size())

@@ -111,7 +111,7 @@ def evaluate(model):
 def main():
     # 配置参数
     epoch_num = 200  # 训练轮数
-    batch_size = 10  # 每次训练样本个数
+    batch_size = 3  # 每次训练样本个数
     train_sample = 50  # 每轮训练总共训练的样本总数
     input_size = 4  # 输入向量维度
     learning_rate = 0.0001  # 学习率
@@ -134,8 +134,8 @@ def main():
 
             # 从DataLoader中获取一个batch的数据
             x, y = next(iter(test_loader))
-            print("x=", x.size())
-            print("y=", y.size())
+            # print("x=", x.size())
+            # print("y=", y.size())
             loss = model(x, y)  # 计算loss
             loss.backward()  # 计算梯度
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # 梯度最大值截断到1.0

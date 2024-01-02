@@ -40,6 +40,9 @@ def build_sample():
         return x, 2
     elif max_index == 3:
         return x, 3
+    else:
+        return x, 4
+
 
 
 # 随机生成一批样本

@@ -63,15 +63,12 @@ def evaluate(model):
     model.eval()
     test_sample_num = 100
     x, y = build_dataset(test_sample_num)
-    print("本次预测集中共有%d个正样本，%d个负样本" % (sum(y), test_sample_num - sum(y)))
     correct, wrong = 0, 0
     with torch.no_grad():
         y_pred = model(x)  # 模型预测
         for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
-            if float(y_p) < 0.5 and int(y_t) == 0:
-                correct += 1  # 负样本判断正确
-            elif float(y_p) >= 0.5 and int(y_t) == 1:
-                correct += 1  # 正样本判断正确
+            if torch.argmax(y_p) == int(y_t):
+                correct += 1
             else:
                 wrong += 1
     print("正确预测个数：%d, 正确率：%f" % (correct, correct / (correct + wrong)))

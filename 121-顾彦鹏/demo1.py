@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 class TorchModel(nn.Module):
     def __init__(self, input_size):
         super(TorchModel, self).__init__()
-        self.linear = nn.Linear(input_size, 3)  
+        self.linear = nn.Linear(input_size, 5)  
         self.activation = torch.softmax  
         self.loss = nn.CrossEntropyLoss() 
 

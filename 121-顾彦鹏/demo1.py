@@ -30,9 +30,16 @@ class TorchModel(nn.Module):
 
 
 def build_sample():
-    x = np.random.random(5)  
-    label = np.random.randint(0, 3)  
-    return x, label
+    x = np.random.random(5)
+    max_index = np.argmax(x)
+    if max_index == 0:
+        return x, 0
+    elif max_index == 1:
+        return x, 1
+    elif max_index == 2:
+        return x, 2
+    elif max_index == 3:
+        return x, 3
 
 
 # 随机生成一批样本

@@ -119,11 +119,13 @@ def evaluate(model):
 
 def main():
     # 配置参数
-    epoch_num = 300  # 训练轮数
-    batch_size = 25  # 每次训练样本个数
-    train_sample = 50  # 每轮训练总共训练的样本总数
+    epoch_num = 200  # 训练轮数
+    batch_size = 100  # 每次训练样本个数
+    train_sample = 500  # 每轮训练总共训练的样本总数
+    # 在将每轮训练的样本总数从25增加到500之后 batch_size的修改便不会导致loss值为nan了
+    # 结论--> train_sample // batch_size 若train_sample太小就不能训练了 所以loss一直是nan
     input_size = 784  # 输入向量维度 输入为图片格式28*28 拉伸为一维784
-    learning_rate = 0.0005  # 学习率
+    learning_rate = 0.001  # 学习率
     class_num = 10
     print("训练集总大小:", len(X_train))
     # 建立模型
@@ -145,8 +147,8 @@ def main():
 
             # 从DataLoader中获取一个batch的数据
             x, y = next(iter(test_loader))
-            print("x=", x.size())
-            print("y=", y.size())
+            # print("x=", x.size())
+            # print("y=", y.size())
             loss = model(x, y)  # 计算loss
             loss.backward()  # 计算梯度
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0) # 梯度最大值截断到1.0

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 """
-123
+
 基于pytorch框架编写模型训练-------交叉熵
 实现一个自行构造的找规律(机器学习)任务
 

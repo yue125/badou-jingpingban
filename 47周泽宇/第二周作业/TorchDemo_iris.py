@@ -13,8 +13,8 @@ from torch.utils.data import TensorDataset, DataLoader
 """
 
 基于pytorch框架编写模型训练
-实现一个自行构造的找规律(机器学习)任务
-规律：x是一个5维向量，如果第1个数>第5个数，则为正样本，反之为负样本
+
+水仙花分类
 
 """
 
@@ -111,10 +111,10 @@ def evaluate(model):
 def main():
     # 配置参数
     epoch_num = 200  # 训练轮数
-    batch_size = 30  # 每次训练样本个数
+    batch_size = 3  # 每次训练样本个数
     train_sample = 50  # 每轮训练总共训练的样本总数
     input_size = 4  # 输入向量维度
-    learning_rate = 0.001  # 学习率
+    learning_rate = 0.0001  # 学习率
     class_num = 3
     print("训练集总大小:", len(X_train))
     # 建立模型
@@ -124,18 +124,21 @@ def main():
     log = []
 
     # 训练过程
+
+    # 每次随机抽取batch_size个 shuffle=True每次会随机打乱抽取
+    test_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     for epoch in range(epoch_num):
         model.train()
         watch_loss = []
         for batch_index in range(train_sample // batch_size):
-            # 每次随机抽取batch_size个 shuffle=True每次会随机打乱抽取
-            test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
             # 从DataLoader中获取一个batch的数据
             x, y = next(iter(test_loader))
-            print("x=", x.size())
-            print("y=", y.size())
+            # print("x=", x.size())
+            # print("y=", y.size())
             loss = model(x, y)  # 计算loss
             loss.backward()  # 计算梯度
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # 梯度最大值截断到1.0
             optim.step()  # 更新权重
             optim.zero_grad()  # 梯度归零
             watch_loss.append(loss.item())

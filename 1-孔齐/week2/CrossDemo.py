@@ -6,9 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 """
-
+123
 基于pytorch框架编写模型训练-------交叉熵
 实现一个自行构造的找规律(机器学习)任务
+
 
 规律：x是一个10维向量，找出其中最小值的所在索引
 """

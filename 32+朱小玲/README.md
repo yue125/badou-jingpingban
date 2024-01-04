@@ -38,8 +38,9 @@ torch.optim.Adam(model.parameters(), lr=learning_rate)需要两个参数，只�
 1. softmax与交叉熵如何配合使用
 2. 为什么需要使用softmax
 3. 如果需要进行多分类，如何实现？思路准备！
-
 ### 2024/01/04
+
+
 
 **任务：**
 第二周作业：多分类问题，使用交叉熵作为损失函数

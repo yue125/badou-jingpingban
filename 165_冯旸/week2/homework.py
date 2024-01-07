@@ -23,27 +23,27 @@ def build_sample():
         if x[s] + x[s+1] > max :
             max = x[s] + x[s+1]
         s += 2
-    # if x[0] + x[1] == max:
-    #     return x, 0
-    # elif x[2] + x[3] == max :
-    #     return x, 1
-    # elif x[4] + x[5] == max :
-    #     return x, 2
-    # elif x[6] + x[7] == max :
-    #     return x, 3
-    # elif x[8] + x[9] == max :
-    #     return x, 4        #如果这里y改成[0,0,0,0,1]，可行吗
-
     if x[0] + x[1] == max:
-        return x, [1,0,0,0,0]
+        return x, 0
     elif x[2] + x[3] == max :
-        return x, [0,1,0,0,0]
+        return x, 1
     elif x[4] + x[5] == max :
-        return x, [0,0,1,0,0]
+        return x, 2
     elif x[6] + x[7] == max :
-        return x, [0,0,0,1,0]
+        return x, 3
     elif x[8] + x[9] == max :
-        return x, [0,0,0,0,1]
+        return x, 4        #如果这里y改成[0,0,0,0,1]，可行吗
+
+    # if x[0] + x[1] == max:
+    #     return x, [1,0,0,0,0]
+    # elif x[2] + x[3] == max :
+    #     return x, [0,1,0,0,0]
+    # elif x[4] + x[5] == max :
+    #     return x, [0,0,1,0,0]
+    # elif x[6] + x[7] == max :
+    #     return x, [0,0,0,1,0]
+    # elif x[8] + x[9] == max :
+    #     return x, [0,0,0,0,1]
 
 
 def build_dataset(total_sample_num):
@@ -53,8 +53,8 @@ def build_dataset(total_sample_num):
         x, y = build_sample()
         X.append(x)
         Y.append(y)
-    # return torch.FloatTensor(X), torch.LongTensor(Y)
-    return torch.FloatTensor(X), torch.FloatTensor(Y)
+    return torch.FloatTensor(X), torch.LongTensor(Y)
+    # return torch.FloatTensor(X), torch.FloatTensor(Y)
 
 
 class TorchModel(nn.Module):
@@ -83,7 +83,7 @@ def evaluate(model):
     with torch.no_grad():
         y_pred = model(x)  # 模型预测
         for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
-            if torch.argmax(y_p) == torch.argmax(y_t):
+            if torch.argmax(y_p) == y_t:
                 correct += 1
             else:
                 wrong += 1
@@ -132,27 +132,23 @@ def main():
     return
 
 
+def predict(model_path, input_vec):
+    input_size = 10
+    model = TorchModel(input_size)
+    model.load_state_dict(torch.load(model_path))  # 加载训练好的权重
+    print(model.state_dict())
 
+    model.eval()  # 测试模式
+    with torch.no_grad():  # 不计算梯度
+        result = model.forward(torch.FloatTensor(input_vec))  # 模型预测
+    for vec, res in zip(input_vec, result):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print("输入：%s, 预测类别：%d, 概率值：%f" % (vec, torch.argmax(res) ,torch.max(res)) )  # 打印结果
 
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    test_vec = [[0.07889086,0.15229675,0.31082123,0.03504317,0.18920843,0.94963533,0.5524256,0.95758807,0.95520434,0.84890681],
+                [0.78797868,0.67482528,0.13625847,0.34675372,0.19871392,0.19349776,0.59416669,0.92579291,0.41567412,0.7358894]]
+    predict("modelwork.pt", test_vec)

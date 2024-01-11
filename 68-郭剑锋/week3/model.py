@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 基于pytorch的网络编写
 实现一个网络完成一个简单nlp任务
-判断文本中是否有某些特定字符出现
+判断文本中字母‘a’出现的位置
 
 """
 
@@ -119,9 +119,9 @@ def build_dataset(sample_length, vocab, sentence_length):
 
 #建立模型
 def build_model(vocab, char_dim, sentence_length):
-    # model = RnnModel(char_dim, sentence_length, vocab)
+    model = RnnModel(char_dim, sentence_length, vocab)
     # model = CnnModel(char_dim, sentence_length, vocab)
-    model = LinearModel(char_dim, sentence_length, vocab)
+    # model = LinearModel(char_dim, sentence_length, vocab)
     return model
 
 
@@ -205,5 +205,5 @@ def predict(model_path, vocab_path, input_strings):
 
 if __name__ == "__main__":
     main()
-    test_strings = ["favfae", "azsdfg", "rqadeg", "nakwaw"]
+    test_strings = ["favfce", "azsdfg", "rqadeg", "nakwew"]
     predict("model.pth", "vocab.json", test_strings)

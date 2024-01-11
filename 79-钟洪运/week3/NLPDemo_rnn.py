@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 基于pytorch的网络编写
 实现一个网络完成一个简单nlp任务
 判断文本中特定字符a出现位置
+问题：重复出现暂未兼容
 
 """
 
@@ -22,7 +23,7 @@ class RnnTestModel(nn.Module):
         self.embedding = nn.Embedding(len(vocab), vector_dim)  # embedding层
         self.rnn = nn.RNN(vector_dim, vector_dim, bias=False, batch_first=True)
         self.classify = nn.Linear(vector_dim, sentence_length)
-        self.softmax = nn.Softmax(dim=-1)
+        # self.softmax = nn.Softmax(dim=-1)
         self.loss = nn.CrossEntropyLoss()
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
@@ -34,7 +35,8 @@ class RnnTestModel(nn.Module):
         if y is not None:
             return self.loss(y_pred, y.squeeze())
         else:
-            return self.softmax(y_pred)
+            # return self.softmax(y_pred)
+            return y_pred
 
 
 # 字符集随便挑了一些字，实际上还可以扩充
@@ -101,8 +103,8 @@ def main():
     batch_size = 20  # 每次训练样本个数
     train_sample = 500  # 每轮训练总共训练的样本总数
     char_dim = 20  # 每个字的维度
-    sentence_length = 6  # 样本文本长度
-    learning_rate = 0.005  # 学习率
+    sentence_length = 10  # 样本文本长度
+    learning_rate = 0.002  # 学习率
     # 建立字表
     vocab = build_vocab()
     # 建立模型
@@ -114,7 +116,7 @@ def main():
     for epoch in range(epoch_num):
         model.train()
         watch_loss = []
-        for batch in range(int(train_sample / batch_size)):
+        for _ in range(int(train_sample / batch_size)):
             x, y = build_dataset(batch_size, vocab, sentence_length)  # 构造一组训练样本
             optim.zero_grad()  # 梯度归零
             loss = model(x, y)  # 计算loss
@@ -141,7 +143,7 @@ def main():
 # 使用训练好的模型做预测
 def predict(model_path, vocab_path, input_strings):
     char_dim = 20  # 每个字的维度
-    sentence_length = 6  # 样本文本长度
+    sentence_length = 10  # 样本文本长度
     vocab = json.load(open(vocab_path, "r", encoding="utf8"))  # 加载字符表
     model = build_model(vocab, char_dim, sentence_length)  # 建立模型
     model.load_state_dict(torch.load(model_path))  # 加载训练好的权重
@@ -158,5 +160,5 @@ def predict(model_path, vocab_path, input_strings):
 
 if __name__ == "__main__":
     main()
-    test_strings = ["favfce", "azsdfg", "rqadeg", "nakwew"]
+    test_strings = ["kijabcdefh", "gijkbcdeaf", "gkijadfbec", "ijhadhfacb"]
     predict("model.pth", "vocab.json", test_strings)

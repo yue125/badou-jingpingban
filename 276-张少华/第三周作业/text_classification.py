@@ -84,6 +84,7 @@ def rightness(predictions, labels):
     ).sum()  # 将下标与labels中包含的类别进行比较，并累计得到比较正确的数量
     return int(rights), len(labels)  # 返回正确的数量和这一次一共比较了多少元素
 
+
 def main():
     # 配置参数
     epoch_num = 20  # 训练轮数
@@ -96,7 +97,7 @@ def main():
     # 建立模型
     model = TorchModel(diction)
     # 选择优化器
-    optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     log = []
     # 训练过程
     for epoch in range(epoch_num):
@@ -104,10 +105,10 @@ def main():
         watch_loss = []
         for batch in range(train_sample // batch_size):
             x, y = build_dataset(batch_size, diction, sentence_length)  # 构造一组训练样本
-            optim.zero_grad()  # 梯度归零
+            optimizer.zero_grad()  # 梯度归零
             loss = model(x, y)  # 计算loss
             loss.backward()  # 计算梯度
-            optim.step()  # 更新权重
+            optimizer.step()  # 更新权重
             watch_loss.append(loss.item())
             # 每隔50步，跑一下校验数据集的数据，输出临时结果
             if batch % 50 == 0:
@@ -139,22 +140,19 @@ def main():
     writer.write(json.dumps(diction, ensure_ascii=False, indent=2))
     writer.close()
 
-#使用训练好的模型做预测
+
+# 使用训练好的模型做预测
 def predict(model_path, dict_path):
-    diction = json.load(open(dict_path, "r", encoding="utf8")) #加载字符表
+    diction = json.load(open(dict_path, "r", encoding="utf8"))  # 加载字符表
     model = TorchModel(diction)
-    model.load_state_dict(torch.load(model_path))             #加载训练好的权重
-    with torch.no_grad:
+    model.load_state_dict(torch.load(model_path))  # 加载训练好的权重
+    with torch.no_grad():
         for _ in range(6):
             x, y, text = build_sample(diction, sentence_length=5)
-            pred = model(x)
-            print("输入：%s, 预测类别：%d, 实际标签：%d" % (text, torch.max(pred, 1)[1], y)) #打印结果
+            pred = model(torch.tensor(x, dtype=torch.float).unsqueeze(0))
+            print("输入：%s, 预测类别：%d, 实际标签：%d" % (text, torch.max(pred, 1)[1], y))  # 打印结果
 
 
 if __name__ == "__main__":
-    main()
-    # predict("model.pth", "vocab.json")
-
-
-
-
+    # main()
+    predict("model.pth", "vocab.json")

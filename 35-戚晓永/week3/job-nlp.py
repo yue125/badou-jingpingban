@@ -49,29 +49,28 @@ class ClassifyModel(nn.Module):
 
 
 class DynamicRNNModel(nn.Module):
-    def __init__(self, dict_size, vector_dim):
+    def __init__(self, dict_size, vector_dim, output_dim):
         super(DynamicRNNModel, self).__init__()
-        # 第一个参数为生成的词向量表的batch_size,第二个参数为每个词向量的维度
         self.embedding = nn.Embedding(dict_size, vector_dim)
         self.rnn = nn.RNN(vector_dim, vector_dim * 2, bias=False, batch_first=False)  # 使用RNN层
-        self.classify = nn.Linear(vector_dim * 2, 1)  # 线性层
-        self.activation = torch.sigmoid  # sigmoid归一化函数
-        self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
+        self.classify = nn.Linear(vector_dim * 2, output_dim)  # 线性层
+        self.loss = nn.functional.cross_entropy  # loss函数采用均方差损失
 
     def forward(self, x, y=None):
         Y_pred = []
+        # TODO
+        # 这种操作会导致backward 报错：RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+        # 具体原因不明确
         for v in x:
             v = self.embedding(torch.LongTensor(v))
-            # print(f'转成的词向量后，x的形状为:{v.shape}')
             _, y_pred = self.rnn(v)
-            y_pred = self.classify(y_pred)
-            y_pred = self.activation(y_pred)
-            Y_pred.append(y_pred.squeeze().tolist())
+            y_pred = self.classify(y_pred).squeeze()
+            Y_pred.append(y_pred.tolist())
 
+        Y_pred = torch.FloatTensor(Y_pred)
+        print(f'Y_pred shape is {Y_pred.shape}')
+        print(f'y shape is {y.shape}')
         if y is not None:
-            Y_pred = torch.tensor(Y_pred)
-            print(f'Y_pred shape is {Y_pred.shape}')
-            print(f'Y_true shape is {y.shape}')
             return self.loss(Y_pred, y)
         else:
             return y_pred
@@ -172,9 +171,9 @@ def train_line_model():
     learning_rate = 0.005  # 学习率
 
     X_char, X, Y = char_gen.generate_char_list(train_sample, 'b')
-    print(f'生成的chars列表为: {X_char}')
-    print(f'对应的字典表索引为：{X}')
-    print(f'样本标注结果为：{Y}')
+    # print(f'生成的chars列表为: {X_char}')
+    # print(f'对应的字典表索引为：{X}')
+    # print(f'样本标注结果为：{Y}')
 
     model = ClassifyModel(dict_size, vector_dim)
 
@@ -210,23 +209,24 @@ def train_line_model():
     return
 
 
-# TODO 训练动态长度语句的模型存在问题，后期再研究
 def train_dynamic_sentence_length_rnn_model():
+    print('动态模型训练=====================此模型存在问题，详见TODO')
     char_gen = CharGen()
     dict_size = len(CharGen().char_dict)  # 初始化字典表的长度
+    flag = 'b'
     vector_dim = 6  # 初始化词向量的长度
-    train_sample = 100  # 总样本数
+    train_sample = 1000  # 总样本数
     epoch_num = 20  # 训练轮数
     batch_size = 20  # 每次训练样本个数
 
     learning_rate = 0.005  # 学习率
 
     X_char, X, Y = char_gen.generate_char_list(train_sample, 'b')
-    print(f'生成的chars列表为: {X_char}')
-    print(f'对应的字典表索引为：{X}')
-    print(f'样本标注结果为：{Y}')
+    # print(f'生成的chars列表为: {X_char}')
+    # print(f'对应的字典表索引为：{X}')
+    # print(f'样本标注结果为：{Y}')
 
-    model = StaticRNNModel(dict_size, vector_dim)
+    model = DynamicRNNModel(dict_size, vector_dim, dict_size)
 
     # 选择优化器
     optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -241,7 +241,7 @@ def train_dynamic_sentence_length_rnn_model():
             optim.zero_grad()  # 梯度归零
 
             # tensor要求各个维度的大小都是相同的，而生成的句子长度是随机的，所以传入模型时，先不以tensor的形式传入，等形状统一后，在转为tensor
-            loss = model(X_batch, torch.FloatTensor(Y_batch))  # 计算loss
+            loss = model(X_batch, torch.LongTensor(Y_batch))  # 计算loss
             loss.backward()  # 计算梯度
             optim.step()  # 更新权重
             watch_loss.append(loss.item())
@@ -267,7 +267,7 @@ def train_static_sentence_length_rnn_model():
     flag = 'b'
     vector_dim = 6  # 初始化词向量的长度
     train_sample = 1000  # 总样本数
-    epoch_num = 20  # 训练轮数
+    epoch_num = 10  # 训练轮数
     batch_size = 20  # 每次训练样本个数
     num_class = 10  # 类别数
     sentence_length = num_class - 1  # 保证flag出现的位置在num_class的范围内
@@ -275,9 +275,9 @@ def train_static_sentence_length_rnn_model():
     learning_rate = 0.005  # 学习率
 
     X_char, X, Y = char_gen.generate_char_list(train_sample, flag, sentence_length)
-    print(f'生成的chars列表为: {X_char}')
-    print(f'对应的字典表索引为：{X}')
-    print(f'样本标注结果为：{Y}')
+    # print(f'生成的chars列表为: {X_char}')
+    # print(f'对应的字典表索引为：{X}')
+    # print(f'样本标注结果为：{Y}')
 
     model = StaticRNNModel(dict_size, vector_dim, num_class)
 
@@ -311,7 +311,9 @@ def train_static_sentence_length_rnn_model():
     # writer.write(json.dumps(vocab, ensure_ascii=False, indent=2))
     writer.close()
 
-    # 进行模型的预测，
+    # 创建测试集数据
+    X_char, X, Y = char_gen.generate_char_list(10, flag, sentence_length)
+
     correct = 0;
     for char, dict, index in zip(X_char, torch.LongTensor(X), Y):
         y_pred = torch.argmax(model(dict))
@@ -322,14 +324,14 @@ def train_static_sentence_length_rnn_model():
 
 
 def main():
-    dict_size = len(CharGen().char_dict)  # 初始化字典表的长度
-    vector_dim = 6  # 初始化词向量的长度
-
     # 训练线性模型
-    train_line_model()
+    # train_line_model()
 
-    # 训练静态长度的RNN模型
+    # 训练预测静态长度文本中字符出现位置的RNN模型
     train_static_sentence_length_rnn_model()
+
+    # 训练预测动态长度文本中字符出现位置的RNN模型
+    train_dynamic_sentence_length_rnn_model()
 
 
 if __name__ == "__main__":

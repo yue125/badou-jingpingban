@@ -136,17 +136,19 @@ def main():
 def predict(model_path, vocab_path, input_strings):
     char_dim = 20  # 每个字的维度
     sentence_length = 6  # 样本文本长度
+    hidden_size = 6
     vocab = json.load(open(vocab_path, "r", encoding="utf8")) #加载字符表
-    model = build_model(vocab, char_dim, sentence_length)     #建立模型
+    model = build_model(vocab, char_dim, sentence_length,hidden_size)     #建立模型
     model.load_state_dict(torch.load(model_path))             #加载训练好的权重
     x = []
     for input_string in input_strings:
         x.append([vocab[char] for char in input_string])  #将输入序列化
     model.eval()   #测试模式
     with torch.no_grad():  #不计算梯度
-        output, result = model.forward(torch.LongTensor(x))  #模型预测
+        output = model.forward(torch.LongTensor(x))  #模型预测
+        target_index = torch.argmax(output, dim=1)
     for i, input_string in enumerate(input_strings):
-        print("输入：%s, 预测类别：%d, 概率值：%f" % (input_string, round(result[i].item()), result[i])) #打印结果
+        print("输入：%s, 预测类别：%d, 概率值：%f" % (input_string,  round(target_index[i].item()), target_index[i])) #打印结果
 
 
 

@@ -1,6 +1,6 @@
 '''
 简单NLP多分类问题
-生成长度为6的字符串, 字符a第一次出现在字符串位置即是类型: index + 1, 当不存在时: 类型为 0
+生成长度为6的字符串, 字符a第一次出现在字符串位置即是类型: index 
 
 '''
 
@@ -60,7 +60,7 @@ def build_vocab():
 
 def build_sample(vocab, sentence_length):
     '''
-    生成长度为sentence_length的字符串, 输出字符a第一次出现的位置: 索引+1, 如果没有: 0
+    生成长度为sentence_length的字符串, 输出字符a第一次出现的位置: 索引
     :param vocab: 词表
     :param sentence_length: 字符串长度
     :return:
@@ -198,9 +198,9 @@ if __name__ == '__main__':
     # num_classes = 7
     # X, Y = build_datasets(vocab, sentence_length, 10)
     # print(X, Y)
-    # main()
-    input_strings = ["abcdef", "bcdefa", "bacdef", "bcadef"]
-    predic("rnn_model.pt", "vocab.json", 6, input_strings)
+    main()
+    #input_strings = ["abcdef", "bcdefa", "bacdef", "bcadef"]
+    #predic("rnn_model.pt", "vocab.json", 6, input_strings)
 
 
 

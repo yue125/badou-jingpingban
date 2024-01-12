@@ -15,9 +15,9 @@ class TorchModel(nn.Module):
         self.loss = nn.functional.mse_loss
         
     def forward(self, x, y=None):
-        x = self.embedding
+        x = self.embedding(x)
         x = x.transpose(1,2)
-        x = x.pool(x)
+        x = self.pool(x)
         x = x.squeeze()
         x = self.structrue(x)
         y_pred = self.activation(x)
@@ -77,23 +77,23 @@ def train():
             print(type(loss))
             loss.backward()
             optim.step()
-    torch.save(model.stat_dict(), "model.pth")
+    torch.save(model.state_dict(), "model.pth")
     with open("vocab.json", "w") as f:
         f.write(json.dumps(vocab, ensure_ascii=False, indent=2))
 
-def predict(model_path, vocab_path, input_string):
+def predict(model_path, vocab_path, input_strings):
     char_dim = 20
     sentence_length = 6
     vocab = json.load(open(vocab_path, "r", encoding="utf-8"))
-    model = build_model(vocab, char_dim, sentence_length)
+    model = build_model(char_dim, sentence_length,vocab)
     model.load_state_dict(torch.load(model_path))
     x = []
-    for input_string in input_string:
+    for input_string in input_strings:
         x.append([vocab[char] for char in input_string])
     model.eval()
     with torch.no_grad():
         result = model.forward(torch.LongTensor(x))
-    for i, input_string in enumerate(input_string):
+    for i, input_string in enumerate(input_strings):
         print("输入: %s, 预测类别: %d, 概率值:%f"%(input_string, round(float(result[i])), result[i]))
         
        

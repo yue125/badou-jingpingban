@@ -24,7 +24,7 @@ class TorchModel(nn.Module):
     def forward(self, x):
         embedded = self.embedding(x)
         outputs, _ = self.rnn(embedded)
-        last_hidden = outputs[:, -1, :]  # 取最后一个时间步的隐藏状态
+        last_hidden = outputs[:, -1, :]  # 取最后一个
         y_pred = self.classify(last_hidden)
         return y_pred
 

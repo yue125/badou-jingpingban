@@ -1,7 +1,7 @@
 """
 
 基于embedding + rnn/pooling + linear的简单nlp任务实现
-任务1: 预测指定字符在字符串中的出现位置 < len(字符串)个任务2模型 or input - embedding - rnn - linear - softmax >
+任务1: 预测指定字符在正向遍历字符串的首次出现位置 < len(字符串)个任务2模型 or input - embedding - rnn - linear - softmax >
 任务2: 预测指定字符在字符串中的指定位置是否出现 < len(字符串)个任务3模型 >
 任务3: 预测指定字符在字符串中是否出现 < input - embedding - pooling - linear - sigmoid >
 ...

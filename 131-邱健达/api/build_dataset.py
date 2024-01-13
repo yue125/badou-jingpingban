@@ -8,6 +8,7 @@ import random
 import torch
 
 # BuildNLPData_000.build_dataset(c:char, sentence_length:int, sample_length:int) -> X, Y
+# y取值为第一次出现目标字符的下标 or 未出现时取sen_len
 class BuildNLPData_000():
     @classmethod
     def build_vocab(cls):

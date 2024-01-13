@@ -1,4 +1,3 @@
-
 import random
 import json
 import torch
@@ -35,6 +34,7 @@ class TorchModel(nn.Module):
         else:
             return y_pred  # 输出预测结果
 
+
 def build_vocab():
     chars = "abcdefghijk"  # 字符集
     vocab = {"pad": 0}
@@ -42,10 +42,11 @@ def build_vocab():
         vocab[char] = index + 1  # 每个字对应一个序号
     vocab['unk'] = len(vocab)  # 26
     return vocab
-  
-#随机生成一个样本
-#从所有字中选取sentence_length个字
-#反之为负样本
+
+
+# 随机生成一个样本
+# 从所有字中选取sentence_length个字
+# 反之为负样本
 def build_sample(vocab, sentence_length):
     x = random.sample(list(vocab.keys()), sentence_length)
     if "a" in x:
@@ -55,8 +56,9 @@ def build_sample(vocab, sentence_length):
     x = [vocab.get(word, vocab['unk']) for word in x]
     return x, y
 
-#建立数据集
-#输入需要的样本数量。需要多少生成多少
+
+# 建立数据集
+# 输入需要的样本数量。需要多少生成多少
 def build_dataset(sample_length, vocab, sentence_length):
     dataset_x = []
     dataset_y = []
@@ -66,13 +68,15 @@ def build_dataset(sample_length, vocab, sentence_length):
         dataset_y.append(y)
     return torch.LongTensor(dataset_x), torch.LongTensor(dataset_y)
 
-#建立模型
+
+# 建立模型
 def build_model(vocab, char_dim, sentence_length):
     model = TorchModel(char_dim, sentence_length, vocab)
     return model
 
-#测试代码
-#用来测试每轮模型的准确率
+
+# 测试代码
+# 用来测试每轮模型的准确率
 def evaluate(model, vocab, sample_length):
     model.eval()
     x, y = build_dataset(200, vocab, sample_length)
@@ -88,14 +92,15 @@ def evaluate(model, vocab, sample_length):
     print("正确预测个数：%d, 正确率：%f" % (correct, correct / (correct + wrong)))
     return correct / (correct + wrong)
 
+
 def main():
-    #配置参数
-    epoch_num = 20        #训练轮数
-    batch_size = 20       #每次训练样本个数
-    train_sample = 500    #每轮训练总共训练的样本总数
-    char_dim = 20         #每个字的维度
-    sentence_length = 6   #样本文本长度
-    learning_rate = 0.005 #学习率
+    # 配置参数
+    epoch_num = 20  # 训练轮数
+    batch_size = 20  # 每次训练样本个数
+    train_sample = 500  # 每轮训练总共训练的样本总数
+    char_dim = 20  # 每个字的维度
+    sentence_length = 6  # 样本文本长度
+    learning_rate = 0.005  # 学习率
 
     # 建立字表
     vocab = build_vocab()
@@ -130,23 +135,24 @@ def main():
     writer.write(json.dumps(vocab, ensure_ascii=False, indent=2))
     writer.close()
 
+
 def predict(model_path, vocab_path, input_strings):
     char_dim = 20  # 每个字的维度
     sentence_length = 6  # 样本文本长度
-    vocab = json.load(open(vocab_path, "r", encoding="utf8")) #加载字符表
-    model = build_model(vocab, char_dim, sentence_length)     #建立模型
-    model.load_state_dict(torch.load(model_path))             #加载训练好的权重
+    vocab = json.load(open(vocab_path, "r", encoding="utf8"))  # 加载字符表
+    model = build_model(vocab, char_dim, sentence_length)  # 建立模型
+    model.load_state_dict(torch.load(model_path))  # 加载训练好的权重
     x = []
     for input_string in input_strings:
-        x.append([vocab[char] for char in input_string])  #将输入序列化
-    model.eval()   #测试模式
-    with torch.no_grad():  #不计算梯度
-        result = model.forward(torch.LongTensor(x))  #模型预测
+        x.append([vocab[char] for char in input_string])  # 将输入序列化
+    model.eval()  # 测试模式
+    with torch.no_grad():  # 不计算梯度
+        result = model.forward(torch.LongTensor(x))  # 模型预测
     for i, input_string in enumerate(input_strings):
-        print("输入：%s, 预测类别：%d, 概率值：%f" % (input_string, round(float(result[i])), result[i])) #打印结果
+        print("输入：%s, 预测类别：%d, 概率值：%f" % (input_string, round(float(result[i])), result[i]))  # 打印结果
+
 
 if __name__ == "__main__":
     main()
     test_strings = ["kijabcdefh", "gijkbcdeaf", "gkijadfbec", "kijhdefacb"]
     predict("model.pth", "vocab.json", test_strings)
-

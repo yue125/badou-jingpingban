@@ -116,11 +116,11 @@ def predict(model_path, input_vec):
 
 if __name__ == '__main__':
     # build_sample()
-    # train()
-    test_vec = [
-        [0.1, 0.3, 0.5, 0.01, 0.66],
-        [0.13, 0.33, 0.55, 0.01, 0.06],
-        [0.01, 0.30, 0.05, 0.01, 0.06],
-        [0.17, 0.03, 0.5, 0.91, 0.06],
-                ]
-    predict("mutil_class_model.pt", test_vec)
+    train()
+    # test_vec = [
+    #     [0.1, 0.3, 0.5, 0.01, 0.66],
+    #     [0.13, 0.33, 0.55, 0.01, 0.06],
+    #     [0.01, 0.30, 0.05, 0.01, 0.06],
+    #     [0.17, 0.03, 0.5, 0.91, 0.06],
+    #             ]
+    # predict("mutil_class_model.pt", test_vec)

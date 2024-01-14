@@ -1,17 +1,17 @@
-# coding:utf8
-import random
-import json
+#coding:utf8
+
 import torch
 import torch.nn as nn
 import numpy as np
+import random
+import json
 import matplotlib.pyplot as plt
 
 """
 
-基于pytorch框架编写模型训练
-实现一个自行构造的找规律(机器学习)任务
-输入一个字符串，根据字符a所在位置进行分类
-对比rnn和pooling做法
+基于pytorch的网络编写
+实现一个网络完成一个简单nlp任务
+判断文本中是否有某些特定字符出现
 
 """
 
@@ -19,16 +19,21 @@ class TorchModel(nn.Module):
     def __init__(self, vector_dim, sentence_length, vocab):
         super(TorchModel, self).__init__()
         self.embedding = nn.Embedding(len(vocab), vector_dim)  #embedding层
-        self.rnn = nn.RNN(vector_dim, vector_dim, batch_first=True)
-        self.classify = nn.Linear(vector_dim, sentence_length + 1)
-        self.loss = nn.functional.cross_entropy
+        # self.pool = nn.AvgPool1d(sentence_length)   #池化层
+        self.RNN = nn.RNN(vector_dim, vector_dim, bias=False, batch_first=True)
+        self.classify = nn.Linear(vector_dim, sentence_length+1)     #线性层
+        # self.activation = torch.sigmoid     #sigmoid归一化函数
+        self.loss = nn.functional.cross_entropy  #loss函数采用均方差损失
 
     #当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
-        x = self.embedding(x)
-        rnn_out, hidden = self.rnn(x)
-        x = hidden.squeeze()
-        y_pred = self.classify(x)
+        x = self.embedding(x) #(batch_size, sen_len) -> (batch_size, sen_len, vector_dim)
+        # x = x.transpose(1, 2) # pooling默认对最后一位进行 所以需要进行转置 #(batch_size, sen_len, vector_dim) -> (batch_size, vector_dim, sen_len)
+        # x = self.pool(x)      #(batch_size, vector_dim, sen_len)->(batch_size, vector_dim, 1)
+        output, hidden = self.RNN(x) # hidden是最后一个时间步的输出
+        x = output[:, -1, :]
+        y_pred = self.classify(x)  #(batch_size, vector_dim) -> (batch_size, 1) 3*5 5*1 -> 3*1
+        # y_pred = self.activation(x) #(batch_size, 1) -> (batch_size, 1)
         if y is not None:
             return self.loss(y_pred, y)   #预测值和真实值计算损失
         else:
@@ -39,22 +44,25 @@ class TorchModel(nn.Module):
 #{"a":1, "b":2, "c":3...}
 #abc -> [1,2,3]
 def build_vocab():
-    chars = "abcdefghijk"  #字符集
-    vocab = {"pad":0}
+    chars = "abcde"  #字符集
+    vocab = {"pad":0} # 第0个位置保留给padding
     for index, char in enumerate(chars):
         vocab[char] = index+1   #每个字对应一个序号
     vocab['unk'] = len(vocab) #26
     return vocab
 
 #随机生成一个样本
+#从所有字中选取sentence_length个字
+#反之为负样本
 def build_sample(vocab, sentence_length):
-    #注意这里用sample，是不放回的采样，每个字母不会重复出现，但是要求字符串长度要小于词表长度
-    x = random.sample(list(vocab.keys()), sentence_length)
+    #随机从字表选取sentence_length个字，可能重复
+    x = [random.choice(list(vocab.keys())) for _ in range(sentence_length)]
     #指定哪些字出现时为正样本
     if "a" in x:
         y = x.index("a")
+    #指定字都未出现，则为负样本
     else:
-        y = sentence_length
+        y = 0
     x = [vocab.get(word, vocab['unk']) for word in x]   #将字转换成序号，为了做embedding
     return x, y
 
@@ -79,13 +87,13 @@ def build_model(vocab, char_dim, sentence_length):
 def evaluate(model, vocab, sample_length):
     model.eval()
     x, y = build_dataset(200, vocab, sample_length)   #建立200个用于测试的样本
-    print("本次预测集中共有%d个样本"%(len(y)))
+    print("本次预测集中共有%d个样本"%200)
     correct, wrong = 0, 0
     with torch.no_grad():
         y_pred = model(x)      #模型预测
         for y_p, y_t in zip(y_pred, y):  #与真实标签进行对比
             if int(torch.argmax(y_p)) == int(y_t):
-                correct += 1
+                correct += 1   #负样本判断正确
             else:
                 wrong += 1
     print("正确预测个数：%d, 正确率：%f"%(correct, correct/(correct+wrong)))
@@ -95,11 +103,11 @@ def evaluate(model, vocab, sample_length):
 def main():
     #配置参数
     epoch_num = 20        #训练轮数
-    batch_size = 40       #每次训练样本个数
-    train_sample = 1000    #每轮训练总共训练的样本总数
-    char_dim = 30         #每个字的维度
-    sentence_length = 10   #样本文本长度
-    learning_rate = 0.001 #学习率
+    batch_size = 20       #每次训练样本个数
+    train_sample = 500    #每轮训练总共训练的样本总数
+    char_dim = 20         #每个字的维度
+    sentence_length = 6   #样本文本长度
+    learning_rate = 0.005 #学习率
     # 建立字表
     vocab = build_vocab()
     # 建立模型
@@ -136,8 +144,8 @@ def main():
 
 #使用训练好的模型做预测
 def predict(model_path, vocab_path, input_strings):
-    char_dim = 30  # 每个字的维度
-    sentence_length = 10  # 样本文本长度
+    char_dim = 20  # 每个字的维度
+    sentence_length = 6  # 样本文本长度
     vocab = json.load(open(vocab_path, "r", encoding="utf8")) #加载字符表
     model = build_model(vocab, char_dim, sentence_length)     #建立模型
     model.load_state_dict(torch.load(model_path))             #加载训练好的权重
@@ -154,5 +162,5 @@ def predict(model_path, vocab_path, input_strings):
 
 if __name__ == "__main__":
     main()
-    test_strings = ["kijabcdefh", "gijkbcdeaf", "gkijadfbec", "kijhdefacb"]
+    test_strings = ["abbcd", "eeeea", "bbebe", "ddaab"]
     predict("model.pth", "vocab.json", test_strings)

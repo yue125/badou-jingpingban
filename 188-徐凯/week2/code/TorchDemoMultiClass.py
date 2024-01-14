@@ -136,7 +136,7 @@ def main():
 
     # 创建训练集
     train_x, train_y = build_dataset(train_sample)
-    # 创建验证集
+    # 创建验证集（保证每次的验证集相同）
     val_dataset = build_dataset(val_sample)
 
     # 建立模型

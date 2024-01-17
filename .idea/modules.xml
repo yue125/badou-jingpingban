@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../BachelorAlbLearningHub/.idea/BachelorAlbLearningHub.iml" filepath="$PROJECT_DIR$/../BachelorAlbLearningHub/.idea/BachelorAlbLearningHub.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SongNLP.iml" filepath="$PROJECT_DIR$/.idea/SongNLP.iml" />
     </modules>
   </component>

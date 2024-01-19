@@ -1,6 +1,27 @@
 import json
 import torch
 from config import BASE_DIR
+class Segmentation:
+    @classmethod
+    def all_cuts(cls, sen, dic):
+        cls.cuts = []
+        cls.dic = dic.copy()
+        cls.dfs_all_combinations(sen, 0, 0, [])
+        return cls.cuts
+    @classmethod
+    def dfs_all_combinations(cls, sen, low, high, res):
+        while high != len(sen):
+            if sen[low:high] in cls.dic.keys():
+                temp = res.copy()
+                temp.append(sen[low:high])
+                ans = cls.dfs_all_combinations(sen, high, high+1, temp)
+                if ans is not None:
+                    cls.cuts.append(ans)
+            high += 1
+        if sen[low:high] in cls.dic.keys():
+            res.append(sen[low:high])
+            return res
+        return None
 def dictToJson(dic, path):
     path = BASE_DIR + "\\data\\" + path
     stream = open(path, "w", encoding="utf8")

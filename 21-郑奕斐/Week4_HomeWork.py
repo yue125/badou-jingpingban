@@ -17,6 +17,7 @@ dict = {'经常':1,
 sentence = '经常有意见分歧'
 max_length = len(max(dict, key = len))
 
+#正向
 def partition(sentence, dictionary):
     result = []
     max_length = len(max(dictionary, key=len))
@@ -32,3 +33,19 @@ def backtracking(s, start_index, path, result, dictionary, max_length):
         prefix = s[start_index:i + 1]
         if prefix in dictionary:
             backtracking(s, i + 1, path + [prefix], result, dictionary, max_length)
+
+#反向
+def backtracing_reverse(sentence, path, result, endindex, max_length):
+    if endindex == -1:
+        result.append(path)  # 倒序添加到结果中
+        return
+    
+    for i in range(endindex, max(endindex - max_length, -1), -1):  # 从末尾向前遍历
+        temp = sentence[i:endindex+1]
+        if temp in dict:
+            backtracing_reverse(sentence, path+[temp], result, i - 1, max_length)
+
+def function_reverse(sentence, max_length):
+    result = []
+    backtracing_reverse(sentence,[],result, len(sentence) - 1, max_length)
+    return result

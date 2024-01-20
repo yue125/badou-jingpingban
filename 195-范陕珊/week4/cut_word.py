@@ -15,15 +15,15 @@ word_p = {
 sentence = "经常有意见分歧"
 
 
-def cut_all(word_p, sentence, index, reverse=False):
+def cut_all(word_p, sentence, index):
     if len(sentence) - 1 == index:
         return [[sentence[index:]]]
     all_res = []
-    for j in range(index + 1, len(sentence)):
+    for j in range(index+1 , len(sentence)+1):
         word = sentence[index:j]
-        if reverse:
-            word = word[::-1]
         if word in word_p:
+            if j == len(sentence) and [word] not in all_res:
+                all_res.append([word])
             cut_child = cut_all(word_p, sentence, j)
             res = [[word] + child for child in cut_child]
             for r in res:
@@ -33,7 +33,5 @@ def cut_all(word_p, sentence, index, reverse=False):
 
 
 cut_left = cut_all(word_p, sentence, 0)
-cut_right = cut_all(word_p, sentence[::-1], 0, True)
-cut_right = [r[::-1] for r in cut_right if r[::-1] not in cut_left]
-for r in cut_left+cut_right:
+for r in cut_left:
     print(r)

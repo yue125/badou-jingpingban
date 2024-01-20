@@ -35,4 +35,5 @@ def cut_all(word_p, sentence, index, reverse=False):
 cut_left = cut_all(word_p, sentence, 0)
 cut_right = cut_all(word_p, sentence[::-1], 0, True)
 cut_right = [r[::-1] for r in cut_right if r[::-1] not in cut_left]
-print(cut_left + cut_right)
+for r in cut_left+cut_right:
+    print(r)

@@ -178,10 +178,10 @@ def predict(model_path, vocab_path, input_strings):
     with torch.no_grad():  # 不计算梯度
         result = model.forward(torch.LongTensor(x))  # 模型预测
     for i, input_string in enumerate(input_strings):
-        print(f"输入：{input_string}, 预测类别：{torch.argmax(result[i])}, 概率值：{result[i]}")  # 打印结果
+        print(f"输入：{input_string}, 预测类别：{torch.argmax(result[i][-1])}, 概率值：{result[i]}")  # 打印结果
 
 
 if __name__ == "__main__":
     main()
-    test_strings = ["fnvfee", "wzsdfg", "rqwdeg", "nakwww"]
+    test_strings = ["fnvfee", "wzsdfg", "rqwdeg", "nakwww","awkwww","wwawkw","wwwawk"]
     predict("model.pth", "vocab.json", test_strings)

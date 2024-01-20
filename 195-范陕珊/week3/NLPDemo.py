@@ -23,7 +23,8 @@ class TorchModel(nn.Module):
         self.embedding = nn.Embedding(len(vocab), vector_dim)  # embedding层
         # self.pool = nn.AvgPool1d(sentence_length)  # 池化层
         print(f"sentence_length, vector_dim,{sentence_length, vector_dim,}")
-        self.classify = nn.RNN(vector_dim, sentence_length + 1, bias=False, batch_first=True)  # 线性层
+        self.rnn=nn.RNN(vector_dim, vector_dim*2,  batch_first=True)  #
+        self.classify = nn.Linear(vector_dim*2, sentence_length + 1)  # 线性层
         # self.activation = torch.sigmoid     #sigmoid归一化函数
         self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
 
@@ -35,14 +36,16 @@ class TorchModel(nn.Module):
         # x = self.pool(x)  # (batch_size, vector_dim, sen_len)->(batch_size, vector_dim, 1)
         # x = x.squeeze()  # (batch_size, vector_dim, 1) -> (batch_size, vector_dim)
         print(f"x{x.shape}")
-        y_pred, y_pred_1 = self.classify(x)  # (batch_size, vector_dim) -> (batch_size, 1) 3*5 5*1 -> 3*1
-        y_pred_2 = y_pred_1.squeeze()
+        y_pred, _ = self.rnn(x)  # (batch_size, vector_dim) -> (batch_size, 1) 3*5 5*1 -> 3*1
+        y_pred_1 =y_pred[:,-1,:]
+        print(f"y_pred_1 {y_pred.shape,y_pred_1.shape}")
+        y_pred_2=self.classify(y_pred_1)
         # y_pred = self.activation(x)                #(batch_size, 1) -> (batch_size, 1)
         if y is not None:
             print(f"loss{y_pred.shape, y_pred_1.shape, y_pred_2.shape, y.shape} {y_pred[0], y[0]}")
             return self.loss(y_pred_2, y)  # 预测值和真实值计算损失
         else:
-            return y_pred  # 输出预测结果
+            return y_pred_2  # 输出预测结果
 
 
 # 字符集随便挑了一些字，实际上还可以扩充
@@ -111,9 +114,9 @@ def evaluate(model, vocab, sample_length):
         y_pred = model(x)  # 模型预测
         print(f"eval{x.shape, y_pred.shape, y.shape}")
         for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
-            print(f"y_p{y_p[-1], y_t}")
+            print(f"y_p{y_p, y_t}")
 
-            if torch.argmax(y_p[-1]) == torch.argmax(y_t):
+            if torch.argmax(y_p) == torch.argmax(y_t):
                 correct += 1  # 负样本判断正确
             else:
                 wrong += 1
@@ -178,7 +181,7 @@ def predict(model_path, vocab_path, input_strings):
     with torch.no_grad():  # 不计算梯度
         result = model.forward(torch.LongTensor(x))  # 模型预测
     for i, input_string in enumerate(input_strings):
-        print(f"输入：{input_string}, 预测类别：{torch.argmax(result[i][-1])}, 概率值：{result[i]}")  # 打印结果
+        print(f"输入：{input_string}, 预测类别：{torch.argmax(result[i])}, 概率值：{result[i]}")  # 打印结果
 
 
 if __name__ == "__main__":

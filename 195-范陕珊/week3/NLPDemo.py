@@ -81,7 +81,6 @@ def build_sample(vocab, sentence_length):
 def build_dataset(sample_length, vocab, sentence_length):
     dataset_x = []
     dataset_y = []
-    default_y = [0] * (sentence_length + 1)
     y_num = {}
     for i in range(sample_length):
         x, y = build_sample(vocab, sentence_length)
@@ -90,8 +89,6 @@ def build_dataset(sample_length, vocab, sentence_length):
             y_num[y] += 1
         else:
             y_num[y] = 1
-        y_t = copy.copy(default_y)
-        y_t[y] = 1
         dataset_y.append(y)
     return torch.LongTensor(dataset_x), torch.LongTensor(dataset_y), y_num
 

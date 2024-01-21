@@ -1,5 +1,8 @@
 ## 作业纪要
 - 每周的作业.py放在HW包中
+### week4: 基于词典的字符串全切分
+#### - *脚本使用方法: 运行HW.HW_week4_full_segmentation.py*
+- 效果: 递归实现AllCombination, 时空复杂度: O(len(sen) * len(sen)) & O(len(sen))
 
 ### week3: 熟悉nlp的分词套路 & 熟悉基于pooling/rnn的nlp任务模型构建套路
 #### - *脚本使用方法: 运行HW.HW_week3_posOfChar.py*

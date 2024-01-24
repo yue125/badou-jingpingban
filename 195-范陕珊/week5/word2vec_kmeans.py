@@ -71,11 +71,7 @@ def cal_distances(center, data):
     return dis / len(data)
 
 
-def main():
-    model = load_word2vec_model("model.w2v")  # 加载词向量模型
-    sentences = load_sentence("titles.txt")  # 加载所有标题
-    sentences = list(sentences)
-    vectors = sentences_to_vectors(sentences, model)  # 将所有标题向量化
+def get_sentencs_vectors_kmeans(sentences, vectors):
     n_clusters = int(math.sqrt(len(sentences)))  # 指定聚类数量
     print("指定聚类数量：", n_clusters)
     kmeans = KMeans(n_clusters)  # 定义一个kmeans计算类
@@ -85,13 +81,34 @@ def main():
     for vector, sentence, label in zip(vectors, sentences, kmeans.labels_):  # 取出句子和标签
         vector_label_dict[label].append(vector)  # 同标签的放到一起
         sentences_label_dict[label].append(sentence)  # 同标签的放到一起
+
+    for label, sentences in sentences_label_dict.items():
+        print("cluster %s :" % label)
+        for i in range(min(10, len(sentences))):  # 随便打印几个，太多了看不过来
+            print(sentences[i].replace(" ", ""))
+        print("---------")
     class_dis_map = {}
     for idx, center in enumerate(kmeans.cluster_centers_):
         print(idx, center)
         label_vectors = vector_label_dict[idx]
         mean_dis = cal_distances(center, label_vectors)
         class_dis_map[mean_dis] = idx
+
     class_dis_sorted = sorted(class_dis_map.items())
+    for idx, (dis, label) in enumerate(class_dis_sorted[::3]):
+        sentences = sentences_label_dict[label]
+        print(f"idx{idx},dis:{dis},label:{label},sentences:{sentences}")
+    return sentences_label_dict, vector_label_dict, kmeans, class_dis_sorted
+
+
+def main():
+    model = load_word2vec_model("model.w2v")  # 加载词向量模型
+    sentences = load_sentence("titles.txt")  # 加载所有标题
+    sentences = list(sentences)
+    vectors = sentences_to_vectors(sentences, model)  # 将所有标题向量化
+    sentences_label_dict, vector_label_dict, kmeans, class_dis_sorted \
+        = get_sentencs_vectors_kmeans(sentences, vectors)
+
     print(f"class_dis_sorted{class_dis_sorted}")
     delete_center_idx = class_dis_sorted[-10:]
     print(f"delete_center_idx{delete_center_idx}")
@@ -104,12 +121,10 @@ def main():
     print(f"delete_all_sentences_idx{delete_all_sentences_idx}")
     new_vectors = [v for idx, v in enumerate(vectors) if idx not in delete_all_sentences_idx]
     new_vectors = np.array(new_vectors)
+    new_sentence = [s for idx, s in enumerate(sentences) if idx not in delete_all_sentences_idx]
+
     print(f"new_vectors{new_vectors.shape, len(delete_all_sentences)}")
-    # for label, sentences in sentence_label_dict.items():
-    #     print("cluster %s :" % label)
-    #     for i in range(min(10, len(sentences))):  #随便打印几个，太多了看不过来
-    #         print(sentences[i].replace(" ", ""))
-    #     print("---------")
+    get_sentencs_vectors_kmeans(new_sentence, new_vectors)
 
 
 if __name__ == "__main__":

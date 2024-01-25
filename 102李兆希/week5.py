@@ -62,20 +62,29 @@ def main():
     labels = kmeans.labels_  # 每个数据点所属分组
     #print(labels)
     # print(vectors.shape)#(1796, 100)
+    #---------------------------------------
+    # 把下面每一类的平均距离算出来
+    #实现类内距离排序
     i=0
     vector_label_dict = defaultdict(list)
     for label in labels:#label从0到41
         vector_label_dict[label].append(vectors[i])
         i+=1
     for label, vectors in vector_label_dict.items():
-        distance=0
+        #total_distance,distance=0,[]
+        total_distance = 0
+        distance=list()
         print("cluster %s :" % label)
         for i in range(len(vectors)):
-            distance+=np.linalg.norm(vectors[i]-centers[label])
-            avg_distance=distance/len(vectors)
-        #print(vectors.__sizeof__())
-        print(avg_distance)
+            total_distance+=np.linalg.norm(vectors[i]-centers[label])
+            distance.append(np.linalg.norm(vectors[i]-centers[label]))
 
+            avg_distance=total_distance/len(vectors)
+        distance.sort()
+        print("类内每个向量到中心点的距离：",distance)
+        #print(vectors.__sizeof__())
+        print("平均距离:%f" % avg_distance)
+#---------------------------
         #print("---------")
 
 
@@ -88,7 +97,7 @@ def main():
 
     #print(labels.shape)#(1796,)
     #print(labels)
-    #把下面每一类的平均距离算出来
+
     # sentence_label_dict = defaultdict(list)
     # for sentence, label in zip(sentences, kmeans.labels_):  #取出句子和标签
     #     #zip 用法

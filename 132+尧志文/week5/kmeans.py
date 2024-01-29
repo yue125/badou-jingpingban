@@ -37,6 +37,7 @@ def sentences_to_vectors(sentences, model):
         vectors.append(vector / len(words))
     return np.array(vectors)
 
+
 def main():
     model = load_word2vec_model("model.w2v") #加载词向量模型
     sentences = load_sentence("titles.txt")  #加载所有标题

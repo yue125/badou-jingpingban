@@ -169,7 +169,7 @@ if __name__ == "__main__":
     # 归一化层参数量
     norm2 = 768 * 2
 
-    # 自注意力层数
+    # encode层数
     self_attention_num = 3
     # encode层参数总量
     encode_params = self_attention_num * (self_attention_params + norm1 + feed_foward_params + norm2)

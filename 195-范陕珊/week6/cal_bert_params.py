@@ -232,6 +232,7 @@ input_x_l = 10
 input_size = input_x_l * hidden_size
 multi_head_size = 64
 multi_head_num = int(hidden_size / multi_head_size)
+scale_size = 4
 # 网络结构
 embedding = words_num * hidden_size
 cal_num += embedding
@@ -250,12 +251,12 @@ linear_size = hidden_size * hidden_size + hidden_size  # bias
 attn_layer_params += wq + wk + wv + linear_size + norm_size
 cal_num += attn_layer_params * transformer_layer_num
 
-feed_forword_params = 0
-inter_layer_num = hidden_size * 4 * hidden_size + 4 * hidden_size  # bias
-output_layer_num = 4 * hidden_size * hidden_size + hidden_size
+feed_forward_params = 0
+inter_layer_num = hidden_size * scale_size * hidden_size + scale_size * hidden_size  # bias
+output_layer_num = scale_size * hidden_size * hidden_size + hidden_size
 
-feed_forword_params += inter_layer_num + output_layer_num + norm_size
-cal_num += feed_forword_params * transformer_layer_num
+feed_forward_params += inter_layer_num + output_layer_num + norm_size
+cal_num += feed_forward_params * transformer_layer_num
 
 output_pooler = hidden_size * hidden_size + hidden_size  # bias
 cal_num += output_pooler

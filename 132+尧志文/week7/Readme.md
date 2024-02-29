@@ -1,5 +1,5 @@
-#测试区分好评or差评
-#config里面num_time参数为测试多少条数据花费时间的参数
+# 测试区分好评or差评
+# config里面num_time参数为测试多少条数据花费时间的参数
 # Bert
 Config = {
     "model_path": "output",

@@ -68,7 +68,7 @@ Config = {
 
 以上参数下，准确率 0.88， 100条数据平均执行时间0.00050998秒
 
-#LSTM
+# LSTM
 Config = {
     "model_path": "output",
     "train_data_path": "train_data.json",
@@ -91,7 +91,7 @@ Config = {
 
 以上参数下，准确率 0.874479， 100条数据平均执行时间0.00660638秒
 
-#GRU
+# GRU
 Config = {
     "model_path": "output",
     "train_data_path": "train_data.json",
@@ -113,7 +113,7 @@ Config = {
 }
 以上参数下，准确率 0.862385， 100条数据平均执行时间0.00566481秒
 
-#RNN
+# RNN
 Config = {
     "model_path": "output",
     "train_data_path": "train_data.json",

@@ -26,7 +26,7 @@ class TorchModel(nn.Module):
         self.rnn=nn.RNN(vector_dim, vector_dim*2,  batch_first=True)  #
         self.classify = nn.Linear(vector_dim*2, sentence_length + 1)  # 线性层
         # self.activation = torch.sigmoid     #sigmoid归一化函数
-        self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
+        self.loss = nn.functional.cross_entropy  # loss函数采用均方差损失
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
@@ -42,7 +42,7 @@ class TorchModel(nn.Module):
         y_pred_2=self.classify(y_pred_1)
         # y_pred = self.activation(x)                #(batch_size, 1) -> (batch_size, 1)
         if y is not None:
-            print(f"loss{y_pred.shape, y_pred_1.shape, y_pred_2.shape, y.shape} {y_pred[0], y[0]}")
+            print(f"loss{x[0], y_pred_2.shape, y.shape} {y_pred_2[0], y[0]}")
             return self.loss(y_pred_2, y)  # 预测值和真实值计算损失
         else:
             return y_pred_2  # 输出预测结果
@@ -81,7 +81,6 @@ def build_sample(vocab, sentence_length):
 def build_dataset(sample_length, vocab, sentence_length):
     dataset_x = []
     dataset_y = []
-    default_y = [0] * (sentence_length + 1)
     y_num = {}
     for i in range(sample_length):
         x, y = build_sample(vocab, sentence_length)
@@ -90,10 +89,8 @@ def build_dataset(sample_length, vocab, sentence_length):
             y_num[y] += 1
         else:
             y_num[y] = 1
-        y_t = copy.copy(default_y)
-        y_t[y] = 1
-        dataset_y.append(y_t)
-    return torch.LongTensor(dataset_x), torch.FloatTensor(dataset_y), y_num
+        dataset_y.append(y)
+    return torch.LongTensor(dataset_x), torch.LongTensor(dataset_y), y_num
 
 
 # 建立模型
@@ -116,7 +113,7 @@ def evaluate(model, vocab, sample_length):
         for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
             print(f"y_p{y_p, y_t}")
 
-            if torch.argmax(y_p) == torch.argmax(y_t):
+            if torch.argmax(y_p) == int(y_t):
                 correct += 1  # 负样本判断正确
             else:
                 wrong += 1

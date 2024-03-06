@@ -47,7 +47,6 @@ def main(vec):
     target_num = len(target_id)
     target_id = torch.LongTensor(target_id)
     targets = model(target_id)
-
     question = torch.nn.functional.normalize(question.unsqueeze(0), dim=-1)
     question = question.repeat(target_num, 1)
     targets = torch.nn.functional.normalize(targets, dim=-1)

@@ -105,22 +105,28 @@ class DataGenerator:  # 定义了一个名为DataGenerator的类，用于数据�
         standard_question_index = list(self.knwb.keys())
         # 随机正样本
         # 根据配置中的正样本比例来随机决定生成正样本还是负样本
-        if random.random() <= self.config["positive_sample_rate"]:
-            # 如果决定生成正样本，则从同一类别中随机选取两个问题作为正样本对
-            p = random.choice(standard_question_index)
-            # 如果选取到的标准问下不足两个问题，则无法选取，所以重新随机一次
-            if len(self.knwb[p]) < 3:
-                return self.random_train_sample()
-            else:
-                s1, s2, s3 = random.sample(self.knwb[p], 3)
-                return [s1, s2, s3, torch.LongTensor([1])]
+        # if random.random() <= self.config["positive_sample_rate"]:
+        # 如果决定生成正样本，则从同一类别中随机选取两个问题作为正样本对
+        # p = random.choice(standard_question_index)
+        p, n = random.sample(standard_question_index, 2)
+        if len(self.knwb[p]) == 1:
+            s1 = s2 = self.knwb[p][0]
+        else:
+            s1, s2 = random.sample(self.knwb[p], 2)
+        s3 = random.choice(self.knwb[n])
+        # 如果选取到的标准问下不足两个问题，则无法选取，所以重新随机一次
+        # if len(self.knwb[p]) < 3:
+        #     return self.random_train_sample()
+        # else:
+        #     s1, s2, s3 = random.sample(self.knwb[p], 3)
+        #     return [s1, s2, s3]
         # 随机负样本
-        else:  # 如果决定生成负样本，则分别从两个不同类别中随机选取问题作为负样本对
-            p, n, a = random.sample(standard_question_index, 3)
-            s1 = random.choice(self.knwb[p])
-            s2 = random.choice(self.knwb[n])
-            s3 = random.choice(self.knwb[a])
-            return [s1, s2, s3, torch.LongTensor([-1])]
+        # else:  # 如果决定生成负样本，则分别从两个不同类别中随机选取问题作为负样本对
+        #     p, n, a = random.sample(standard_question_index, 3)
+        #     s1 = random.choice(self.knwb[p])
+        #     s2 = random.choice(self.knwb[n])
+        #     s3 = random.choice(self.knwb[a])
+        return [s1, s2, s3]
 
 
 # 加载字表或词表

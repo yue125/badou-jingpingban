@@ -50,8 +50,8 @@ def main(config):
             if cuda_flag:  # 如果GPU可用
                 batch_data = [d.cuda() for d in batch_data]  # 将批数据移动到GPU上
             # 从批数据中解包输入和标签
-            input_id1, input_id2, input_id3, labels = batch_data  # 输入变化时这里需要修改，比如多输入，多输出的情况
-            loss = model(input_id1, input_id2, input_id3, labels)  # 将输入数据和标签传入模型，计算损失
+            input_id1, input_id2, labels = batch_data  # 输入变化时这里需要修改，比如多输入，多输出的情况
+            loss = model(input_id1, input_id2, labels)  # 将输入数据和标签传入模型，计算损失
             train_loss.append(loss.item())  # 将损失值添加到损失列表中
             # if index % int(len(train_data) / 2) == 0:
             #     logger.info("batch loss %f" % loss)

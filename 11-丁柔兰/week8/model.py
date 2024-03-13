@@ -49,7 +49,7 @@ class SiameseNetwork(nn.Module):
         # 在孪生网络中，创建了一个SentenceEncoder实例来编码句子，
         # 并定义了一个余弦嵌入损失函数，用于计算两个句子编码之间的相似度损失
         self.sentence_encoder = SentenceEncoder(config)
-        self.loss = self.cosine_triplet_loss
+        self.loss = nn.CosineEmbeddingLoss()
 
     # 计算余弦距离  1-cos(a,b)
     # cos=1时两个向量相同，余弦距离为0；cos=0时，两个向量正交，余弦距离为1
@@ -79,17 +79,18 @@ class SiameseNetwork(nn.Module):
     # 再次定义forward方法，用于处理输入的句子并可能计算损失
     def forward(self, sentence1, sentence2=None, sentence3=None, target=None):
         # 同时传入两个句子
-        if sentence3 is not None:  # 如果提供了两个句子，分别计算它们的编码
+        if sentence2 is not None and sentence3 is not None:  # 如果提供了两个句子，分别计算它们的编码
             vector1 = self.sentence_encoder(sentence1)  # vec:(batch_size, hidden_size)
             vector2 = self.sentence_encoder(sentence2)
             vector3 = self.sentence_encoder(sentence3)
+            return self.cosine_triplet_loss(vector1, vector2, vector3)
             # 如果有标签，则计算loss
             # 如果提供了目标标签，计算loss并返回损失值。如果没有标签，返回余弦距离
-            if target is not None:
-                return self.loss(vector1, vector2, vector3, target.squeeze())
-            # 如果无标签，计算余弦距离
-            else:
-                return self.cosine_distance(vector1, vector2)
+            # if target is not None:
+            #     return self.cosine_triplet_loss(vector1, vector2, vector3)
+            # # 如果无标签，计算余弦距离
+            # else:
+            #     return self.cosine_distance(vector1, vector2)
         # 单独传入一个句子时，认为正在使用向量化能力
         # 如果只有一个句子，返回该句子的编码
         else:
@@ -120,9 +121,8 @@ if __name__ == "__main__":
     # 创建两个示例句子和它们的标签（可能表示句子是否相似）
     s1 = torch.LongTensor([[1, 2, 3, 0], [2, 2, 0, 0]])
     s2 = torch.LongTensor([[1, 2, 3, 4], [3, 2, 3, 4]])
-    s3 = torch.LongTensor([[1, 2, 0, 0], [3, 0, 0, 0]])
     l = torch.LongTensor([[1], [0]])
     # 将句子通过模型前向传播，计算损失，并打印输出
-    y = model(s1, s2, s3, l)
+    y = model(s1, s2, l)
     print(y)
     # print(model.state_dict())# 打印模型的状态字典，即模型的参数

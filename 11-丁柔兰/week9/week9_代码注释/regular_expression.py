@@ -28,7 +28,7 @@ import time
 ###########################################
 
 # re.sub(pattern, repl, string, count=0) 利用正则替换文本
-#将string中匹配到pattern的部分，替换为repl
+# 将string中匹配到pattern的部分，替换为repl
 # phone = "2004-959-559 # 这是一个国外电话号码"
 # # 删除字符串中的 # 后注释
 # num = re.sub('#.*$', "", phone)
@@ -37,7 +37,7 @@ import time
 # num = re.sub('\d', "*", phone)
 # print("电话号码是 : ", num)
 
-#repl 参数可以是一个函数,要注意传入的参数不是值本身，是match对象
+# repl 参数可以是一个函数,要注意传入的参数不是值本身，是match对象
 # 将匹配的数字乘以 2
 # def double(matched):
 #     return str(int(matched.group()) * 2)
@@ -45,14 +45,14 @@ import time
 # string = 'A23G4HFD567'
 # print(re.sub('\d', double, string))
 
-#count参数决定替换几次，默认是全部替换
+# count参数决定替换几次，默认是全部替换
 # string = "00000"
 # print(re.sub("0", "1", string, count=2))
 
 #############################
 
-#re.findall(string[, pos[, endpos]])
-#在字符串中找到正则表达式所匹配的所有子串，并返回一个列表，如果没有找到匹配的，则返回空列表
+# re.findall(string[, pos[, endpos]])
+# 在字符串中找到正则表达式所匹配的所有子串，并返回一个列表，如果没有找到匹配的，则返回空列表
 # pattern = re.compile('\d+')  # 查找数字
 # result1 = pattern.findall('runoob 123 google 456')
 # result2 = pattern.findall('run88oob123google456', 0, 10)
@@ -86,23 +86,36 @@ import time
 
 
 # 效率
+'''
+这段代码的目的是为了给出在长字符串中查找短字符串时，使用预编译的正则表达式与使用Python内置的in关键字比较的性能测试结果。通过对比两者的耗时，可以了解在特定情况下哪种方法更加高效
+'''
+# 导入time模块用于计时，random模块用于生成随机数据
 import time
 import random
 
+# 创建一个包含英文字母表的列表
 chars = list("abcdefghijklmnopqrstuvwxyz")
-#随机生成长度为n的字母组成的字符串
+# 随机生成长度为n的字母组成的字符串
+# 使用列表推导式随机选择100个字母，并将它们连接成一个长字符串
 string = "".join([random.choice(chars) for i in range(100)])
+# 同样，随机选择4个字母，并将它们连接成一个较短的字符串，这将作为待查找的模式
 pattern = "".join([random.choice(chars) for i in range(4)])
+# 使用正则表达式的compile方法预编译待查找的模式，以提高查找效率
 re_pattern = re.compile(pattern)
-start_time = time.time()
-for i in range(50000):
+start_time = time.time()  # 记录开始查找的时间
+for i in range(50000):  # 设置一个循环，进行50000次查找操作
+    # 在循环中使用正则表达式模块的search方法查找预编译的模式在长字符串中的匹配。
+    # 被注释的两行代码是之前的测试代码，用于每次循环都生成一个新的模式并进行查找，但当前测试中不需要这样做
     # pattern = "".join([random.choice(chars) for i in range(3)])
     # re.search(pattern, string)
     re.search(re_pattern, string)
+# 打印正则表达式查找所花费的总时间
 print("正则查找耗时：", time.time() - start_time)
-
+# 重置开始查找的时间，以便于测试下一种查找方法
 start_time = time.time()
-for i in range(50000):
+for i in range(50000):  # 再次设置一个循环，进行50000次查找操作
+    # 在循环中使用Python的in关键字来检查短字符串是否存在于长字符串中。同样，被注释的代码是之前的测试代码，在当前测试中不使用
     # pattern = "".join([random.choice(chars) for i in range(3)])
     pattern in string
+# 使用Python in关键字查找所花费的总时间
 print("python in查找耗时：", time.time() - start_time)

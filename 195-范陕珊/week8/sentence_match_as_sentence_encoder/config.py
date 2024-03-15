@@ -17,6 +17,6 @@ Config = {
     "batch_size": 64,
     "epoch_data_size": 200,  # 每轮训练中采样数量
     "positive_sample_rate": 0.5,  # 正样本比例
-    "optimizer": "adam",
+    "optimizer": "sgd",
     "learning_rate": 1e-3,
 }

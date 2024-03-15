@@ -25,7 +25,7 @@ class SentenceEncoder(nn.Module):
     # 输入为问题字符编码
     def forward(self, x):
         sentence_length = torch.sum(x.gt(0), dim=-1)
-        # x = self.embedding(x)
+        x = self.embedding(x)
         # 使用lstm
         # x, _ = self.layer(x)
         # 使用线性层
@@ -71,9 +71,9 @@ class SiameseNetwork(nn.Module):
         if vector_n is not None:
             # 计算loss
             # return self.loss(vector_a, vector_p, vector_n)
-            return self.cosine_triplet_loss(vector_a, vector_p, vector_n)
+            return self.loss(vector_a, vector_p, vector_n)
         elif vector_p is not None:
-            return self.cosine_distance(vector_a, vector_p)
+            return self.loss1(vector_a, vector_p)
         # 单独传入一个句子时，认为正在使用向量化能力
         else:
             return vector_a

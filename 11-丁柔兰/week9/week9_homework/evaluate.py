@@ -28,9 +28,10 @@ class Evaluator:
             sentences = self.valid_data.dataset.sentences[index * self.config["batch_size"]: (index+1) * self.config["batch_size"]]
             if torch.cuda.is_available():
                 batch_data = [d.cuda() for d in batch_data]
-            input_id, labels = batch_data   #输入变化时这里需要修改，比如多输入，多输出的情况
+            input_ids, attention_mask, token_type_ids, labels = batch_data   #输入变化时这里需要修改，比如多输入，多输出的情况
             with torch.no_grad():
-                pred_results = self.model(input_id) #不输入labels，使用模型当前参数进行预测
+                # pred_results = self.model(input_id) #不输入labels，使用模型当前参数进行预测
+                pred_results = self.model(input_ids, attention_mask, token_type_ids)
             self.write_stats(labels, pred_results, sentences)
         self.show_stats()
         return

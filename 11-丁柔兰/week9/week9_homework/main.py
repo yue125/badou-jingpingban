@@ -43,9 +43,10 @@ def main(config):
         for index, batch_data in enumerate(train_data):
             optimizer.zero_grad()
             if cuda_flag:
-                batch_data = [d.cuda() for d in batch_data]
-            input_id, labels = batch_data   #输入变化时这里需要修改，比如多输入，多输出的情况
-            loss = model(input_id, labels)
+                batch_data = tuple(d.cuda() for d in batch_data)
+
+            input_ids, attention_mask, token_type_ids, labels = batch_data
+            loss = model(input_ids, attention_mask, token_type_ids, labels)
             loss.backward()
             optimizer.step()
             train_loss.append(loss.item())

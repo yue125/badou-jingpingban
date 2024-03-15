@@ -19,5 +19,5 @@ Config = {
     "learning_rate": 1e-3,
     "use_crf": True,
     "class_num": 9,
-    "bert_path": r"F:\Desktop\work_space\pretrain_models\bert-base-chinese"
+    "bert_path": r"E:\work_space\pretrain_models\models-bert-base-chinese"
 }

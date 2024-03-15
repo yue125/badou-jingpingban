@@ -8,39 +8,37 @@ from torchcrf import CRF
 建立网络模型结构
 """
 
+from transformers import BertModel
+
 class TorchModel(nn.Module):
     def __init__(self, config):
         super(TorchModel, self).__init__()
-        hidden_size = config["hidden_size"]
-        vocab_size = config["vocab_size"] + 1
-        max_length = config["max_length"]
-        class_num = config["class_num"]
-        num_layers = config["num_layers"]
-        self.embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=0)
-        self.layer = nn.LSTM(hidden_size, hidden_size, batch_first=True, bidirectional=True, num_layers=num_layers)
-        self.classify = nn.Linear(hidden_size * 2, class_num)
-        self.crf_layer = CRF(class_num, batch_first=True)
+        self.bert = BertModel.from_pretrained(config["bert_path"])
+        self.classifier = nn.Linear(self.bert.config.hidden_size, config["class_num"])
+        self.crf_layer = CRF(config["class_num"], batch_first=True)
         self.use_crf = config["use_crf"]
-        self.loss = torch.nn.CrossEntropyLoss(ignore_index=-1)  #loss采用交叉熵损失
 
-    #当输入真实标签，返回loss值；无真实标签，返回预测值
-    def forward(self, x, target=None):
-        x = self.embedding(x)  #input shape:(batch_size, sen_len)
-        x, _ = self.layer(x)      #input shape:(batch_size, sen_len, input_dim)
-        predict = self.classify(x) #ouput:(batch_size, sen_len, num_tags) -> (batch_size * sen_len, num_tags)
+    def forward(self, input_ids, attention_mask, token_type_ids, labels=None):
+        outputs = self.bert(input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        sequence_output = outputs.last_hidden_state
+        logits = self.classifier(sequence_output)
 
-        if target is not None:
+        if labels is not None:
             if self.use_crf:
-                mask = target.gt(-1)
-                return - self.crf_layer(predict, target, mask, reduction="mean")
+                # 创建一个掩码，对于非忽略索引 (-100) 的位置为 True，否则为 False
+                mask = labels.ne(-100)
+                # 计算 CRF 损失，确保 labels 中没有忽略索引传递给 CRF 层
+                loss = -self.crf_layer(logits, labels.where(mask, torch.tensor(0).to(labels.device)), mask=mask,
+                                       reduction="mean")
+                return loss
             else:
-                #(number, class_num), (number)
-                return self.loss(predict.view(-1, predict.shape[-1]), target.view(-1))
+                return self.loss(logits.view(-1, logits.shape[-1]), labels.view(-1))
         else:
             if self.use_crf:
-                return self.crf_layer.decode(predict)
+                return self.crf_layer.decode(logits)
             else:
-                return predict
+                return logits
+
 
 
 def choose_optimizer(config, model):

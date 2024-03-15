@@ -16,7 +16,7 @@ class MultiClassficationTorchModel(nn.Module):
     def __init__(self, input_size):
         super().__init__()
         self.linear = nn.Linear(input_size, input_size)
-        self.loss = nn.functional.cross_entropy
+        self.loss = nn.functional.cross_entropy # torch的ce自带softmax
 
     def forward(self, x, y=None):
         y_pred = self.linear(x)

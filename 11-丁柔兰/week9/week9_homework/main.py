@@ -55,7 +55,7 @@ def main(config):
         logger.info("epoch average loss: %f" % np.mean(train_loss))
         evaluator.eval(epoch)
     model_path = os.path.join(config["model_path"], "epoch_%d.pth" % epoch)
-    # torch.save(model.state_dict(), model_path)
+    torch.save(model.state_dict(), model_path)
     return model, train_data
 
 if __name__ == "__main__":

@@ -16,8 +16,8 @@ Config = {
     "epoch": 20,
     "batch_size": 16,
     "optimizer": "adam",
-    "learning_rate": 1e-3,
-    "use_crf": False,
+    "learning_rate": 1e-4,
+    "use_crf": True,
     "class_num": 9,
     "use_bert": True,
     "bert_path": r"D:\git\open_object\bert-base-chinese"

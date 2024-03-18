@@ -14,7 +14,6 @@ class TorchModel(nn.Module):
         super(TorchModel, self).__init__()
         hidden_size = config["hidden_size"]
         vocab_size = config["vocab_size"] + 1
-        max_length = config["max_length"]
         class_num = config["class_num"]
         num_layers = config["num_layers"]
         self.use_bert = config["use_bert"]

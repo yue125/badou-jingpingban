@@ -7,14 +7,14 @@ Config = {
     "schema_path": "ner_data/schema.json",
     "train_data_path": "ner_data/train",
     "valid_data_path": "ner_data/test",
-    "vocab_path": "chars.txt",  # bert-base-chinese/vocab.txt词库不全
+    "vocab_path": "bert-base-chinese/vocab.txt",  # bert-base-chinese/vocab.txt词库不全
     "max_length": 100,
     "hidden_size": 256,
     "num_layers": 2,
     "epoch": 20,
     "batch_size": 16,
     "optimizer": "adam",
-    "learning_rate": 1e-3,
+    "learning_rate": 5e-5,
     "use_crf": True,
     "class_num": 9,
     "bert_path": r"bert-base-chinese"

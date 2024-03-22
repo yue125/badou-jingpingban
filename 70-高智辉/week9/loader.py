@@ -1,19 +1,14 @@
 import json
-import re
-import os
 import torch
-import random
-import jieba
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
+from transformers import BertTokenizer
 
 
 class DataGenerator:
     def __init__(self, data_path, config):
         self.config = config
         self.path = data_path
-        self.vocab = load_vocab(config["vocab_path"])
-        self.config["vocab_size"] = len(self.vocab)
+        self.tokenizer = load_vocab(config["bert_path"])
         self.sentences = []
         self.schema = self.load_schema(config["schema_path"])
         self.load()
@@ -25,7 +20,7 @@ class DataGenerator:
             segments = f.read().split("\n\n")
             for segment in segments:
                 sentenece = []
-                labels = []
+                labels = [8]
                 for line in segment.split("\n"):
                     if line.strip() == "":
                         continue
@@ -39,16 +34,8 @@ class DataGenerator:
         return
 
     def encode_sentence(self, text, padding=True):
-        input_id = []
-        if self.config["vocab_path"] == "words.txt":
-            for word in jieba.cut(text):
-                input_id.append(self.vocab.get(word, self.vocab["[UNK]"]))
-        else:
-            for char in text:
-                input_id.append(self.vocab.get(char, self.vocab["[UNK]"]))
-        if padding:
-            input_id = self.padding(input_id)
-        return input_id
+        return self.tokenizer.encode(text, padding="max_length", max_length=self.config["max_length"],truncation=True)
+
 
     # 补齐或截断输入的序列，使其可以在一个batch内运算
     def padding(self, input_id, pad_token=0):
@@ -69,13 +56,7 @@ class DataGenerator:
 
 # 加载字表或词表
 def load_vocab(vocab_path):
-    token_dict = {}
-    with open(vocab_path, encoding="utf8") as f:
-        for index, line in enumerate(f):
-            token = line.strip()
-            token_dict[token] = index + 1  # 0留给padding位置，所以从1开始
-    token_dict["[UNK]"] = len(token_dict)+1
-    return token_dict
+    return BertTokenizer.from_pretrained(vocab_path)
 
 
 # 用torch自带的DataLoader类封装数据

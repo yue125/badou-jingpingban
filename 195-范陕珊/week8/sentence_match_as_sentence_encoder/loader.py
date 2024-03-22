@@ -7,6 +7,7 @@ from collections import defaultdict
 import jieba
 import torch
 from torch.utils.data import DataLoader
+from transformers import BertTokenizer
 
 """
 数据加载
@@ -19,6 +20,7 @@ class DataGenerator:
         self.path = data_path
         self.vocab = load_vocab(config["vocab_path"])
         self.config["vocab_size"] = len(self.vocab)
+        self.tokenizer = BertTokenizer.from_pretrained(config["pretrain_model_path"])
         self.schema = load_schema(config["schema_path"])
         self.train_data_size = config["epoch_data_size"]  # 由于采取随机采样，所以需要设定一个采样数量，否则可以一直采
         self.data_type = None  # 用来标识加载的是训练集还是测试集 "train" or "test"
@@ -51,14 +53,18 @@ class DataGenerator:
         return
 
     def encode_sentence(self, text):
+
         input_id = []
         if self.config["vocab_path"] == "words.txt":
             for word in jieba.cut(text):
                 input_id.append(self.vocab.get(word, self.vocab["[UNK]"]))
         else:
-            for char in text:
-                input_id.append(self.vocab.get(char, self.vocab["[UNK]"]))
-        input_id = self.padding(input_id)
+            input_id = self.tokenizer.encode(text, max_length=self.config["max_length"], pad_to_max_length=True)
+
+            # for char in text:
+            #
+            #     input_id.append(self.vocab.get(char, self.vocab["[UNK]"]))
+        # input_id = self.padding(input_id)
         return input_id
 
     # 补齐或截断输入的序列，使其可以在一个batch内运算

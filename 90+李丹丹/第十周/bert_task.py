@@ -77,22 +77,25 @@ def build_dataset(sample_length, window_size, corpus):
 
 
 # 文本生成测试代码
-def generate_sentence(openings, model, window_size):
+def generate_sentence(openings, model):
     model.eval()
     with torch.no_grad():
-        x = torch.tensor(tokenizer.encode(openings[-window_size:])).unsqueeze(0)  # Batch size 1
+        x = tokenizer.encode(openings, add_special_tokens=True, return_tensors='pt')
+        # 将mask_token转换为一个张量，形状与x相同
+        mask_tensor = torch.full_like(x, fill_value=tokenizer.mask_token_id, dtype=torch.long)
+        # 寻找输入文本中[MASK]标记的位置
+        mask_index = (x != mask_tensor).nonzero(as_tuple=True)[1]
         for _ in range(50):
             if torch.cuda.is_available():
                 x = x.cuda()
             y = model(x)[0][-1]
-            next_token_id = torch.argmax(y, dim=-1).unsqueeze(-1)
-            x = torch.cat([x, next_token_id.unsqueeze(1)], dim=-1)
-            if next_token_id == tokenizer.eos_token_id:
+            predict_index = torch.argmax(y[mask_index]).item()
+            predict_token = tokenizer.convert_ids_to_tokens([predict_index])[0]
+            # 更新输入文本，替换下一个[MASK]标记
+            x[0, mask_index[0]] = predict_index
+            if predict_token == tokenizer.sep_token:
                 break
-        pre_text = tokenizer.decode(x[0])
-        # 去除特殊标记
-        special_token = [tokenizer.cls_token, tokenizer.sep_token, tokenizer.pad_token]
-        pre_text = " ".join(token for token in pre_text.split() if token not in special_token)
+        pre_text = tokenizer.decode(x.squeeze(), skip_special_tokens=True)
     return pre_text
 
 
@@ -141,8 +144,8 @@ def train(corpus_path, save_weight=True):
             optim.step()  # 更新权重
             watch_loss.append(loss.item())
         print("=========\n第%d轮平均loss:%f" % (epoch + 1, np.mean(watch_loss)))
-        print(generate_sentence("让他在半年之前，就不能做出", model, window_size))
-        print(generate_sentence("李慕站在山路上，深深的呼吸", model, window_size))
+        print(generate_sentence("让他在半年之前，就不能做出", model))
+        print(generate_sentence("李慕站在山路上，深深的呼吸", model))
     if not save_weight:
         return
     else:

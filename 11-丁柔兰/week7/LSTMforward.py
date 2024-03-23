@@ -75,8 +75,9 @@ def numpy_lstm(x, state_dict):
         # g = np.tanh(np.dot(x_t, w_c_x.T) + b_c_x + np.dot(h_t, w_c_h.T) + b_c_h)
         g = np.tanh(np.dot(hx, w_c.T) + b_c)
         c_t = f_t * c_t + i_t * g
+        # o_t = sigmoid(np.dot(x_t, w_o_x.T) + b_o_x + np.dot(h_t, w_o_h.T) + b_o_h)
+        o_t = sigmoid(np.dot(hx, w_o.T) + b_o)
         h_t = o_t * np.tanh(c_t)
-        # 收集序列输出。
         sequence_output.append(h_t)
     return np.array(sequence_output), (h_t, c_t)
 

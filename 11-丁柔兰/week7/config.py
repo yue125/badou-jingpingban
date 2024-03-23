@@ -6,8 +6,8 @@
 
 Config = {
     "model_path": "output",
-    "train_data_path": "../data/train_tag_news.json",
-    "valid_data_path": "../data/valid_tag_news.json",
+    "train_data_path": "data/train_tag_news.json",
+    "valid_data_path": "data/valid_tag_news.json",
     "vocab_path":"chars.txt",
     "model_type":"cnn",
     "max_length": 30,
@@ -19,6 +19,6 @@ Config = {
     "pooling_style":"max",
     "optimizer": "adam",
     "learning_rate": 1e-3,
-    "pretrain_model_path":r"F:\Desktop\work_space\pretrain_models\bert-base-chinese",
+    "pretrain_model_path":r"E:\work_space\pretrain_models\models-bert-base-chinese",
     "seed": 987
 }

@@ -2,7 +2,6 @@
 
 import json
 import torch
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer
 import pandas as pd
@@ -27,7 +26,7 @@ class DataGenerator:
     def load(self):
         self.data = []  # 初始化一个空列表，用于存储处理后的数据
         # 读取CSV文件
-        data = pd.read_csv("../data/文本分类练习.csv", encoding='utf8')
+        data = pd.read_csv(self.path, encoding='utf8')
         # 将DataFrame转换为JSON格式的字符串，并写入文件
         with open('output.json', 'w', encoding='utf-8') as f:
             f.write(data.to_json(orient='records', lines=True))

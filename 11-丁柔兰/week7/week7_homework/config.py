@@ -6,8 +6,8 @@
 
 Config = {
     "model_path": "output",
-    "train_data_path": "../data/train_tag_news.json",
-    "valid_data_path": "../data/valid_tag_news.json",
+    "train_data_path": "../data/文本分类练习.csv",
+    "valid_data_path": "../data/文本分类练习.csv",
     "vocab_path":"chars.txt",
     "model_type":"cnn",
     "max_length": 30,

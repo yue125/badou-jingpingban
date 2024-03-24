@@ -31,6 +31,7 @@ def main(config):
         os.mkdir(config["model_path"])
     #加载训练数据
     train_data = load_data(config["train_data_path"], config)
+    train_data, val_data = train_test_split(data, test_size=0.2)
     #加载模型
     model = TorchModel(config)
     # 标识是否使用gpu

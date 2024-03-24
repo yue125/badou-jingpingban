@@ -10,10 +10,10 @@ Config = {
     "schema_path": "ner_data/schema.json",  # 存储数据标签架构的 JSON 文件路径。
     "train_data_path": "ner_data/train",  # 训练数据集的路径。
     "valid_data_path": "ner_data/test",  # 验证数据集的路径。
-    "vocab_path": "chars.txt",  # 字符集文件的路径，用于构建模型的词汇表。
+    "vocab_path": r"E:\work_space\pretrain_models\models-bert-base-chinese\vocab.txt",  # 字符集文件的路径，用于构建模型的词汇表。
     "max_length": 100,  # 输入序列的最大长度。
     "hidden_size": 256,  # 模型隐藏层的大小。
-    "num_layers": 2,  # 模型中的层数。
+    "num_layers": 12,  # 模型中的层数。
     "epoch": 20,  # 训练过程中的迭代次数。
     "batch_size": 16,  # 每个批次的样本数量。
     "optimizer": "adam",  # 优化器的类型，此处使用 Adam。

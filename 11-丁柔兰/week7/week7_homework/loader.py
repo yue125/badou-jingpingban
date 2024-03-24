@@ -2,6 +2,7 @@
 
 import json
 import torch
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer
 import pandas as pd
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     # data = pd.read_csv("../data/文本分类练习.csv", encoding='utf8')
     # # 将DataFrame转换为JSON格式的字符串，并写入文件
     # with open('output.json', 'w', encoding='utf-8') as f:
-    #     f.write(data.to_json(orient='records', lines=True))
+    #     f.write(data.to_json(orient='records', force_ascii=False))
     # # 读取并加载JSON文件
     # with open('output.json', 'r', encoding='utf-8') as f:
     #     data_list = [json.loads(line) for line in f]

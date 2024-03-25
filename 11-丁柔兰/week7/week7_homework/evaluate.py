@@ -4,7 +4,6 @@ import time
 
 import pandas as pd
 import torch
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from loader import load_data
 
@@ -15,6 +14,7 @@ from loader import load_data
 class Evaluator:
     def __init__(self, config, model, logger):
         self.config = config
+        self.model_type = config['model_type']
         self.model = model
         self.logger = logger
         self.valid_data = load_data(config["valid_data_path"], config, shuffle=False)
@@ -53,7 +53,7 @@ class Evaluator:
         self.logger.info("--------------------")
         # 创建一个包含单行数据的字典
         data = {
-            'Model': 'Logistic Regression',
+            'Model': self.model_type,
             '预测正确条目': correct,
             '预测错误条目': wrong,
             '预测准确率': correct / (correct + wrong),
@@ -63,9 +63,13 @@ class Evaluator:
         csv_file_path = '../data/results.csv'
         if os.path.exists(csv_file_path):
             # 如果文件存在，读取现有数据
-            # results_df = pd.read_csv(csv_file_path)
-            # 追加新数据
-            results_df = pd.read_csv(csv_file_path).append(data, ignore_index=True)
+            results_df = pd.read_csv(csv_file_path)
+            # # 追加新数据
+            # results_df = results_df.append(data, ignore_index=True)
+            # 创建一个新的 DataFrame 来存储新的数据行
+            new_row_df = pd.DataFrame([data])
+            # 使用 concat 函数追加新数据
+            results_df = pd.concat([results_df, new_row_df], ignore_index=True)
         else:
             # 如果文件不存在，创建一个新的 DataFrame
             results_df = pd.DataFrame([data])

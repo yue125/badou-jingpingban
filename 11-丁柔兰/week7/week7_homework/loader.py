@@ -76,7 +76,8 @@ def load_vocab(vocab_path):
 def load_data(data_path, config, shuffle=True):
     dg = DataGenerator(data_path, config)
     dl = DataLoader(dg, batch_size=config["batch_size"], shuffle=shuffle)
-    return dl
+    vocab_size = len(dg)# 获取词汇表大小
+    return dl,vocab_size
 
 if __name__ == "__main__":
     from config import Config

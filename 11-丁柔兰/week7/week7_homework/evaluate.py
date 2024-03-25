@@ -11,14 +11,15 @@ from loader import load_data
 模型效果测试
 """
 
+
 class Evaluator:
     def __init__(self, config, model, logger):
         self.config = config
         self.model_type = config['model_type']
         self.model = model
         self.logger = logger
-        self.valid_data = load_data(config["valid_data_path"], config, shuffle=False)
-        self.stats_dict = {"correct":0, "wrong":0}  #用于存储测试结果
+        self.valid_data,self.vocab_size = load_data(config["valid_data_path"], config, shuffle=False)
+        self.stats_dict = {"correct": 0, "wrong": 0}  # 用于存储测试结果
 
     def eval(self, epoch):
         self.logger.info("开始测试第%d轮模型效果：" % epoch)
@@ -27,9 +28,9 @@ class Evaluator:
         for index, batch_data in enumerate(self.valid_data):
             if torch.cuda.is_available():
                 batch_data = [d.cuda() for d in batch_data]
-            input_ids, labels = batch_data   #输入变化时这里需要修改，比如多输入，多输出的情况
+            input_ids, labels = batch_data  # 输入变化时这里需要修改，比如多输入，多输出的情况
             with torch.no_grad():
-                pred_results = self.model(input_ids) #不输入labels，使用模型当前参数进行预测
+                pred_results = self.model(input_ids)  # 不输入labels，使用模型当前参数进行预测
             self.write_stats(labels, pred_results)
         acc = self.show_stats()
         return acc
@@ -47,17 +48,31 @@ class Evaluator:
     def show_stats(self):
         correct = self.stats_dict["correct"]
         wrong = self.stats_dict["wrong"]
-        self.logger.info("预测集合条目总量：%d" % (correct +wrong))
+        self.logger.info("预测集合条目总量：%d" % (correct + wrong))
         self.logger.info("预测正确条目：%d，预测错误条目：%d" % (correct, wrong))
         self.logger.info("预测准确率：%f" % (correct / (correct + wrong)))
         self.logger.info("--------------------")
+        return correct / (correct + wrong)
+
+    def write_to_csv(self, vocab_size, total_time):
+        correct = self.stats_dict["correct"]
+        wrong = self.stats_dict["wrong"]
         # 创建一个包含单行数据的字典
         data = {
-            'Model': self.model_type,
-            '预测正确条目': correct,
-            '预测错误条目': wrong,
-            '预测准确率': correct / (correct + wrong),
-            '预测集合条目总量': correct + wrong
+            'model_type': self.model_type,
+            'max_length': self.config["max_length"],
+            'hidden_size': self.config["hidden_size"],
+            'kernel_size': self.config["kernel_size"],
+            'num_layers': self.config["num_layers"],
+            'epoch': self.config["epoch"],
+            'batch_size': self.config["batch_size"],
+            'pooling_style': self.config["pooling_style"],
+            'optimizer': self.config["optimizer"],
+            'learning_rate': self.config["learning_rate"],
+            'class_num': self.config["class_num"],
+            'vocab_size': vocab_size,
+            'acc': correct / (correct + wrong),
+            'prediction_speed': (correct + wrong) / total_time  # 每秒预测的样本数
         }
         # 检查 CSV 文件是否存在
         csv_file_path = '../data/results.csv'
@@ -75,4 +90,3 @@ class Evaluator:
             results_df = pd.DataFrame([data])
         # 将 DataFrame 写入 CSV 文件
         results_df.to_csv(csv_file_path, index=False, encoding='utf-8-sig')
-        return correct / (correct + wrong)

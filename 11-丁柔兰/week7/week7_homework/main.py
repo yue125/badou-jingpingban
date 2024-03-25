@@ -34,8 +34,11 @@ def main(config):
         os.mkdir(config["model_path"])
     # 加载训练数据,获取词汇表大小
     train_data, vocab_size = load_data(config["train_data_path"], config)
+    # 调整seed随机数种子，随机抽取一个模型  seed数值分别为 666，888，555
+    config["model_type"] = random.choice(config["all_model_type"])
     # 加载模型
     model = TorchModel(config)
+    model.model_type = random.choice(config["all_model_type"])
     # 标识是否使用gpu
     cuda_flag = torch.cuda.is_available()
     if cuda_flag:

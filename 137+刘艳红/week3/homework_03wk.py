@@ -37,7 +37,7 @@ def build_vocab():
     vocab['unk']=num
     return vocab
 
-
+# print(build_vocab())
 def build_sample(vocab, sentence_length):
     x = [random.choice([i for i in 'qwertyuiopsdfghjklzxcvbnm']) for _ in range(sentence_length-1)]
     y=random.randint(0,sentence_length-1)

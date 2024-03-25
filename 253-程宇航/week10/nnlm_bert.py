@@ -3,35 +3,49 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import math
 import random
 import os
-from transformers import BertModel, BertTokenizer
+import re
+from transformers import BertModel
+from transformers import BertTokenizer
 
 """
-基于预训练bert的语言模型
+基于pytorch的bert语言模型
 """
+
 
 class LanguageModel(nn.Module):
-    def __init__(self, hidden_size, vocab_size):
+    def __init__(self, input_dim, tokenizer):
         super(LanguageModel, self).__init__()
-        self.bert = BertModel.from_pretrained(r"D:\git\open_object\bert-base-chinese", return_dict=False)
+        #self.embedding = nn.Embedding(len(vocab) + 1, input_dim)
+        #self.layer = nn.LSTM(input_dim, input_dim, num_layers=1, bidirectional=True, batch_first=True)
+        self.layer = BertModel.from_pretrained(r"D:\badou-jingpin\bert-base-chinese", return_dict=False)
+        hidden_size = self.layer.config.hidden_size     # 从bert导入768
+        vocab_size = self.layer.config.vocab_size       # 导入bert的词表维度
         self.classify = nn.Linear(hidden_size, vocab_size)
+        self.dropout = nn.Dropout(0.1)
         self.loss = nn.functional.cross_entropy
 
     #当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
+        #x = self.embedding(x)       #output shape:(batch_size, sen_len, input_dim)
+        x, _ = self.layer(x)        #output shape:(batch_size, sen_len, input_dim)
+        #x = x[:, -1, :]             #output shape:(batch_size, input_dim)
+        y_pred = self.classify(x)   #output shape:(batch_size, vocab_size)
         if y is not None:
-            mask = torch.tril(torch.ones((x.shape[0], x.shape[1], x.shape[1])))
-            if torch.cuda.is_available():
-                mask = mask.cuda()
-            x, _ = self.bert(x, attention_mask=mask)
-            y_pred = self.classify(x)
             return self.loss(y_pred.view(-1, y_pred.shape[-1]), y.view(-1))
         else:
-            x, _ = self.bert(x)
-            y_pred = self.classify(x)
             return torch.softmax(y_pred, dim=-1)
 
+#加载字表
+def build_vocab(vocab_path):
+    vocab = {"<pad>":0}
+    with open(vocab_path, encoding="utf8") as f:
+        for index, line in enumerate(f):
+            char = line[:-1]       #去掉结尾换行符
+            vocab[char] = index + 1 #留出0位给pad token
+    return vocab
 
 #加载语料
 def load_corpus(path):
@@ -43,18 +57,28 @@ def load_corpus(path):
 
 #随机生成一个样本
 #从文本中截取随机窗口，前n个字作为输入，最后一个字作为输出
+
 def build_sample(tokenizer, window_size, corpus):
     start = random.randint(0, len(corpus) - 1 - window_size)
     end = start + window_size
     window = corpus[start:end]
-    target = corpus[start + 1:end + 1]  #输入输出错开一位
+    target = corpus[start + 1: end + 1]
+    # print(window, target)
+    #x = [vocab.get(word, vocab["<UNK>"]) for word in window]   #将字转换成序号
+    #y = vocab.get(target, vocab["<UNK>"])
 
-    x = tokenizer.encode(window, add_special_tokens=False, padding="max_length", truncation=True, max_length=10)  # 将字转换成序号
-    y = tokenizer.encode(target, add_special_tokens=False, padding="max_length", truncation=True, max_length=10)
+    # 通过encode编码将文本变成序列
+    #x = tokenizer.encode(list(window))
+    #y = tokenizer.encode(list(target), add_special_tokens=False)
+
+    # 通过convert_tokens_to_ids直接将文本变成序列
+    x = [tokenizer.convert_tokens_to_ids(word) for word in window]
+    y = [tokenizer.convert_tokens_to_ids(word) for word in target]
     return x, y
 
 #建立数据集
 #sample_length 输入需要的样本数量。需要多少生成多少
+#vocab 词表
 #window_size 样本长度
 #corpus 语料字符串
 def build_dataset(sample_length, tokenizer, window_size, corpus):
@@ -67,25 +91,31 @@ def build_dataset(sample_length, tokenizer, window_size, corpus):
     return torch.LongTensor(dataset_x), torch.LongTensor(dataset_y)
 
 #建立模型
-def build_model(hidden_size, vocab_size):
-    model = LanguageModel(768, 21128)
+def build_model(char_dim, tokenizer):
+    model = LanguageModel(char_dim, tokenizer)
     return model
 
 #文本生成测试代码
 def generate_sentence(openings, model, tokenizer, window_size):
+    #reverse_vocab = dict((y, x) for x, y in vocab.items())
     model.eval()
     with torch.no_grad():
         pred_char = ""
-        #生成了换行符，或生成文本超过30字则终止迭代
+        #生成了换行符，或生成文本超过20字则终止迭代
         while pred_char != "\n" and len(openings) <= 30:
             openings += pred_char
-            x = tokenizer.encode(openings, add_special_tokens=False)
+
+            # x = tokenizer.encode([char for char in openings[-window_size:]])
+            x = [tokenizer.convert_tokens_to_ids(char) for char in openings[-window_size:]]
             x = torch.LongTensor([x])
             if torch.cuda.is_available():
                 x = x.cuda()
+            # y = model(x)
             y = model(x)[0][-1]
             index = sampling_strategy(y)
-            pred_char = "".join(tokenizer.decode(index))
+            #pred_char = reverse_vocab[index]
+            # pred_char = tokenizer.decode([index], skip_special_tokens=True)
+            pred_char = tokenizer.ids_to_tokens[index]
     return openings
 
 def sampling_strategy(prob_distribution):
@@ -100,21 +130,39 @@ def sampling_strategy(prob_distribution):
         return np.random.choice(list(range(len(prob_distribution))), p=prob_distribution)
 
 
+#计算文本ppl
+def calc_perplexity(sentence, model, vocab, window_size):
+    prob = 0
+    model.eval()
+    with torch.no_grad():
+        for i in range(1, len(sentence)):
+            start = max(0, i - window_size)
+            window = sentence[start:i]
+            x = [vocab.get(char, vocab["<UNK>"]) for char in window]
+            x = torch.LongTensor([x])
+            target = sentence[i]
+            target_index = vocab.get(target, vocab["<UNK>"])
+            if torch.cuda.is_available():
+                x = x.cuda()
+            pred_prob_distribute = model(x)[0]
+            target_prob = pred_prob_distribute[target_index]
+            prob += math.log(target_prob, 10)
+    return 2 ** (prob * ( -1 / len(sentence)))
+
+
 def train(corpus_path, save_weight=True):
     epoch_num = 20        #训练轮数
     batch_size = 64       #每次训练样本个数
-    train_sample = 10000   #每轮训练总共训练的样本总数
-    hidden_size = 768        #每个字的维度
+    train_sample = 50000   #每轮训练总共训练的样本总数
+    char_dim = 256        #每个字的维度
     window_size = 10       #样本文本长度
-    vocab_size = 21128     #字表大小
-    learning_rate = 0.001  #学习率
-    tokenizer = BertTokenizer.from_pretrained(r"D:\git\open_object\bert-base-chinese")
-
+    tokenizer = BertTokenizer.from_pretrained(r"D:\badou-jingpin\bert-base-chinese", return_dict=False)   # 定义bert词表
     corpus = load_corpus(corpus_path)     #加载语料
-    model = build_model(hidden_size, vocab_size)    #建立模型
+    model = build_model(char_dim, tokenizer)    #建立模型
+
     if torch.cuda.is_available():
         model = model.cuda()
-    optim = torch.optim.Adam(model.parameters(), lr=learning_rate)   #建立优化器
+    optim = torch.optim.Adam(model.parameters(), lr=0.01)   #建立优化器
     print("文本词表模型加载完毕，开始训练")
     for epoch in range(epoch_num):
         model.train()
@@ -142,4 +190,5 @@ def train(corpus_path, save_weight=True):
 
 
 if __name__ == "__main__":
+    # build_vocab_from_corpus("corpus/all.txt")
     train("corpus.txt", False)

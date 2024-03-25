@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import csv
 import json
 import torch
 from torch.utils.data import DataLoader
@@ -25,34 +25,23 @@ class DataGenerator:
 
     def load(self):
         self.data = []  # 初始化一个空列表，用于存储处理后的数据
-        # 读取CSV文件
-        data = pd.read_csv(self.path, encoding='utf8')
-        # 将DataFrame转换为JSON格式的字符串，并写入文件
-        with open('output.json', 'w', encoding='utf-8') as f:
-            f.write(data.to_json(orient='records', lines=True))
-        # 读取并加载JSON文件
-        with open('output.json', 'r', encoding='utf-8') as f:
-            data_list = [json.loads(line) for line in f]
-        # with open(self.path, encoding="utf8") as f:  # 打开一个文件（路径为 self.path），并确保使用 utf8 编码
-        for line in data_list:  # 遍历文件中的每一行
-            # line = json.loads(line)  # 把每行文本转换为 JSON 对象
-            # tag = line["label"]  # 获取当前评论的标签（例如好评或差评）
-            # label = self.label_to_index[tag]  # 将标签转换为索引（整数），这通常是在分类任务中将标签转换为模型能处理的格式
-            label = line["label"]
-            # title = line["title"]  # 获取评论的标题
-            title = line["review"]  # 获取评论的内容
-
-            if self.config["model_type"] == "bert":  # 检查配置是否指定使用 BERT 模型
-                # 如果是 BERT 模型，使用 tokenizer 对标题进行编码，转换为 input_id
-                # max_length 参数限制编码后的长度，pad_to_max_length 参数确保所有编码长度一致，不足的部分使用填充
-                input_id = self.tokenizer.encode(title, max_length=self.config["max_length"],
-                                                 pad_to_max_length=True)
-            else:
-                # 如果不是 BERT 模型，则使用自定义的 encode_sentence 方法对标题进行编码
-                input_id = self.encode_sentence(title)
-            input_id = torch.LongTensor(input_id)  # 把编码后的 input_id 转换为 PyTorch 的 LongTensor 类型
-            label_index = torch.LongTensor([label])  # 把标签索引也转换为 PyTorch 的 LongTensor 类型
-            self.data.append([input_id, label_index])  # 将处理后的 input_id 和标签索引作为一个列表添加到 self.data 中
+        with open(self.path, 'r', encoding='gb18030') as f:
+            data = csv.reader(f)
+            next(data)  # 跳过第一行的标题部分
+            for line in data:
+                label = int(line[0])
+                review = line[1]
+                if self.config["model_type"] == "bert":  # 检查配置是否指定使用 BERT 模型
+                    # 如果是 BERT 模型，使用 tokenizer 对标题进行编码，转换为 input_id
+                    # max_length 参数限制编码后的长度，pad_to_max_length 参数确保所有编码长度一致，不足的部分使用填充
+                    input_id = self.tokenizer.encode(review, max_length=self.config["max_length"],
+                                                     padding='max_length', truncation=True)
+                else:
+                    # 如果不是 BERT 模型，则使用自定义的 encode_sentence 方法对标题进行编码
+                    input_id = self.encode_sentence(review)
+                input_id = torch.LongTensor(input_id)  # 把编码后的 input_id 转换为 PyTorch 的 LongTensor 类型
+                label_index = torch.LongTensor([label])  # 把标签索引也转换为 PyTorch 的 LongTensor 类型
+                self.data.append([input_id, label_index])  # 将处理后的 input_id 和标签索引作为一个列表添加到 self.data 中
         return  # 方法结束，没有返回值，因为处理后的数据存储在 self.data 属性中
 
     def encode_sentence(self, text):

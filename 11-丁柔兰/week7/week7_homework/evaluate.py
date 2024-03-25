@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+import time
+
+import pandas as pd
 import torch
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
 from loader import load_data
 
 """
@@ -45,4 +50,32 @@ class Evaluator:
         self.logger.info("预测正确条目：%d，预测错误条目：%d" % (correct, wrong))
         self.logger.info("预测准确率：%f" % (correct / (correct + wrong)))
         self.logger.info("--------------------")
+        # # 记录模型预测开始时间
+        # start_time = time.time()
+        # # 记录模型预测结束时间
+        # end_time = time.time()
+        # # 计算模型预测时间
+        # prediction_time_lr = end_time - start_time
+        # # 计算性能指标
+        # # 准确率（Accuracy）：accuracy_score 函数计算的是模型正确预测的样本数与总样本数的比例。它是最直观的性能衡量指标。
+        # accuracy_lr = accuracy_score(true_label, pred_label)
+        # # 精确率（Precision）：precision_score 函数计算的是模型正确预测为正类的样本数与模型预测为正类的总样本数的比例。它衡量了模型预测正类别时的准确性。
+        # precision_lr = precision_score(true_label, pred_label)
+        # # 召回率（Recall）：recall_score 函数计算的是模型正确预测为正类的样本数与真实为正类的样本数的比例。也称为真正例率，它衡量了模型捕捉到的正类别样本的比例。
+        # recall_lr = recall_score(true_label, pred_label)
+        # # F1 分数（F1 Score）：f1_score 函数计算的是精确率和召回率的调和平均数。它是精确率和召回率的综合指标，特别适用于类别不平衡的情况。
+        # f1_lr = f1_score(true_label, pred_label)
+        # # 创建一个空的 DataFrame
+        # results_df = pd.DataFrame(
+        #     columns=['Model', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'Prediction Time'])
+        # # 添加逻辑回归模型的性能数据
+        # results_df = results_df.append({
+        #     'Model': 'Logistic Regression',
+        #     'Accuracy': accuracy_lr,
+        #     'Precision': precision_lr,
+        #     'Recall': recall_lr,
+        #     'F1 Score': f1_lr,
+        #     'Prediction Time': prediction_time_lr
+        # }, ignore_index=True)
+        # print(results_df)
         return correct / (correct + wrong)

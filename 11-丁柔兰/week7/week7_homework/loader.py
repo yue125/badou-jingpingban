@@ -25,7 +25,7 @@ class DataGenerator:
 
     def load(self):
         self.data = []  # 初始化一个空列表，用于存储处理后的数据
-        with open(self.path, 'r', encoding='gb18030') as f:
+        with open(self.path, 'r', encoding='utf-8',errors='ignore') as f:
             data = csv.reader(f)
             next(data)  # 跳过第一行的标题部分
             for line in data:

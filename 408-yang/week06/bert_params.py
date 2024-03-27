@@ -22,8 +22,7 @@ def get_pool_param_cnt(state_dict):
 
 def get_attention_layer_param_cnt(state_dict,i):
     attent_layer_param_cnt = 0
-    
-    m,n=  state_dict["encoder.layer.%d.attention.output.dense.weight"%i].shape
+    m,n=  state_dict["encoder.layer.%d.attention.self.query.weight"%i].shape
     attent_layer_param_cnt += m*n
     m= state_dict["encoder.layer.%d.attention.self.query.bias" % i].shape
     attent_layer_param_cnt += int(m[0])
@@ -35,11 +34,12 @@ def get_attention_layer_param_cnt(state_dict,i):
     attent_layer_param_cnt += m*n
     m=  state_dict["encoder.layer.%d.attention.self.value.bias" % i].shape
     attent_layer_param_cnt += int(m[0])
-    # 分为多个头，多个头的权重最后会拼接在一起
+    # attention ouput 层
     m,n= state_dict["encoder.layer.%d.attention.output.dense.weight"%i].shape
     attent_layer_param_cnt += m*n
     m= state_dict["encoder.layer.%d.attention.output.dense.bias"%i].shape
     attent_layer_param_cnt += int(m[0])
+
     # attention之后经过一次layerNorm (add&norm) 残差网络
     m= state_dict["encoder.layer.%d.attention.output.LayerNorm.weight"%i].shape
     attent_layer_param_cnt += int(m[0])
@@ -49,6 +49,7 @@ def get_attention_layer_param_cnt(state_dict,i):
     # feedforward 4倍数 两个线性层
     m,n= state_dict["encoder.layer.%d.intermediate.dense.weight"%i].shape 
     attent_layer_param_cnt += m*n
+
     m=  state_dict["encoder.layer.%d.intermediate.dense.bias"%i].shape
     attent_layer_param_cnt += int(m[0])
 
@@ -82,15 +83,38 @@ def get_embedding_parm_cnt(state_dict):
 
     embeddings_layer_norm_bias_m  = state_dict["embeddings.LayerNorm.bias"].shape
     embedding_cnt += int(embeddings_layer_norm_bias_m[0])
-    
     return embedding_cnt
+
+def cal_params_cnt_no_dict(vocab,max_sequence_length,embedding_size,token_type=2,num_layer=12):
+    # embedding 层
+    
+    embedding_cnt = vocab*embedding_size + max_sequence_length*embedding_size+ token_type*embedding_size + embedding_size+embedding_size
+    # attention层
+    self_attention_cnt = (embedding_size*embedding_size + embedding_size)*3 
+
+    attention_output_cnt = embedding_size*embedding_size + embedding_size
+    # wx+b
+    attention_layer_norm_cnt = embedding_size + embedding_size
+    # np.dot()
+    ffn_cnt = embedding_size * embedding_size*4 +embedding_size*4 + 4*embedding_size*embedding_size+embedding_size
+    # wx+b
+    layer_norm_cnt_2 = embedding_size + embedding_size
+
+    # pool_cnt np.dot()
+    pool_cnt = embedding_size*embedding_size + embedding_size
+
+    total_cnt = embedding_cnt + num_layer*(self_attention_cnt+attention_output_cnt+attention_layer_norm_cnt+ffn_cnt+layer_norm_cnt_2) + pool_cnt
+
+    return total_cnt
+
 
 def main():
     vocab = 21128               # 词表数目
     max_sequence_length = 512   # 最大句子长度
+    embedding_size = 768
     bert =BertModel.from_pretrained(f"./bert/model/bert_base_chinese", return_dict=False)
     state_dict = bert.state_dict()
-    print(state_dict.keys())
+    # print(state_dict.keys())
     parameter_count = 0
     for name, param in state_dict.items():
     # 忽略掉不包含'numel'方法的键，这通常是指向其他模块的参数
@@ -101,8 +125,10 @@ def main():
     
     # print(bert.state_dict().keys()) 
     # diyBert = DiyBert(state_dict=state_dict)
-    param_cnt = cal_params_cnt(vocab,max_sequence_length,state_dict=state_dict,num_layers=12)
+    param_cnt = cal_params_cnt(state_dict,num_layers=12)
     print(param_cnt)
+    param_cnt_new = cal_params_cnt_no_dict(vocab,max_sequence_length,embedding_size,token_type=2,num_layer=12)
+    print(param_cnt_new)
 
     
 if __name__ == "__main__":

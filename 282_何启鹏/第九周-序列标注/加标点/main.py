@@ -10,6 +10,7 @@ from config import Config
 from model import TorchModel, choose_optimizer
 from evaluate import Evaluator
 from loader import load_data
+from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ def main(config):
         model.train()
         logger.info("epoch %d begin" % epoch)
         train_loss = []
-        for index, batch_data in enumerate(train_data):
+        for index, batch_data in enumerate(tqdm(train_data)):
             optimizer.zero_grad()
             if cuda_flag:
                 batch_data = [d.cuda() for d in batch_data]
@@ -58,7 +59,7 @@ def main(config):
         logger.info("epoch average loss: %f" % np.mean(train_loss))
         evaluator.eval(epoch)
     model_path = os.path.join(config["model_path"], "epoch_%d.pth" % epoch)
-    torch.save(model.state_dict(), model_path)
+    # torch.save(model.state_dict(), model_path)
     return model, train_data
 
 

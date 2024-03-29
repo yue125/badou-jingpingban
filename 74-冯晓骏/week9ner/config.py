@@ -9,13 +9,13 @@ Config = {
     "schema_path": "ner_data/schema.json",
     "train_data_path": "ner_data/train",
     "valid_data_path": "ner_data/test",
-    "vocab_path":"chars.txt",
+    "vocab_path": "chars.txt",
 
     "seed": 987,
     "schema_path": "ner_data/schema.json",
     "train_data_path": "ner_data/train",
     "valid_data_path": "ner_data/test",
-    "vocab_path":"chars.txt",
+    "vocab_path": "chars.txt",
     "max_length": 100,
     "optimizer": "adam",
     "learning_rate": 5e-6,
@@ -26,6 +26,6 @@ Config = {
     "class_num": 9,
     "use_crf": True,
 
-    "use_bert":True,
-    "bert_path":r'D:/work/bert'
+    "use_bert": True,
+    "bert_path": r'D:/work/bert'
 }

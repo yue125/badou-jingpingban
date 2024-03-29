@@ -36,7 +36,7 @@ class DataGenerator(Dataset):
             self.sentences = []  # 初始化句子列表。
             # 遍历每个段落。
             for segment in segments:
-                sentence, labels = [], []  # 初始化句子和标签列表。
+                sentence, labels = [], [8]  # 初始化句子和标签列表。
                 # 分割段落为多行，每行包含字符和标签。
                 for line in segment.split("\n"):
                     if line:

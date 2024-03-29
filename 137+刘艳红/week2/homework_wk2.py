@@ -39,14 +39,15 @@ class TM(nn.Module):
     def __init__(self,input_size):
         super().__init__()
         self.lin=nn.Linear(input_size,5)
-        self.act=torch.softmax
+        # self.act=torch.softmax
         self.loss=nn.functional.cross_entropy
     def forward(self,x,y):
         y_=self.lin(x)
-        y_pre=self.act(y_,1)
+        # y_pre=self.act(y_,1) 
         # print("检验预测值",y_pre.shape)
         # print("检验真实值", y.shape)
-        loss=self.loss(y_pre,y)
+        # loss=self.loss(y_pre,y)
+        loss=self.loss(y_,y)
         return loss
     def pred(self,x):
         y_ = self.lin(x)

@@ -43,6 +43,7 @@ def main(config):
             
             optimizer.zero_grad()
             loss = model(x, mask, y)
+            loss.backward()
             optimizer.step()
             train_loss.append(loss.item())
         logger.info("Average Batch loss %f" % (np.mean(train_loss)))

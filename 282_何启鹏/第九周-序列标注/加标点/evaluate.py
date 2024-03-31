@@ -27,6 +27,8 @@ class Evaluator:
             if torch.cuda.is_available():
                 batch_data = [d.cuda() for d in batch_data]
             input_id, labels = batch_data   #输入变化时这里需要修改，比如多输入，多输出的情况
+            if len(input_id)!=len(sentences):
+                print(1)
             with torch.no_grad():
                 pred_results = self.model(input_id) #不输入labels，使用模型当前参数进行预测
             self.write_stats(labels, pred_results, sentences)

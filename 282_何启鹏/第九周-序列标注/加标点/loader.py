@@ -29,7 +29,7 @@ class DataGenerator:
         self.load()
 
     def load(self):
-        self.data = []
+        self.data = [] # 31353
         with open(self.path, encoding="utf8") as f:
             for line in f:
                 if len(line) > self.max_length:
@@ -39,6 +39,10 @@ class DataGenerator:
                 else:
                     input_id, label = self.process_sentence(line)
                     self.data.append([torch.LongTensor(input_id), torch.LongTensor(label)])
+        if len(self.data) == 7088:
+            self.data = self.data[:self.config['batch_size']*25]
+        else:
+            self.data = self.data[:self.config['batch_size']*250] # 10000 
         return
 
     def process_sentence(self, line):
@@ -58,7 +62,7 @@ class DataGenerator:
         encode_sentence = self.encode_sentence(sentence_without_sign)
         # 将文本对应标签进行padding,如果要采用预训练模型还需要在cls位置添加一个-1，
         if self.config["use_bert"]:
-            label = [-1] + label  # 在cls位置添加一个-1
+            label = [-1] + label + [-1] # 在cls位置添加一个-1
         label = self.padding(label, -1)
         assert len(encode_sentence) == len(label)
         self.sentences.append("".join(sentence_without_sign))
@@ -123,4 +127,4 @@ def load_data(data_path, config, shuffle=True):
 if __name__ == "__main__":
     from config import Config
 
-    dg = DataGenerator("./data/train_corpus.txt", Config)
+    dg = DataGenerator("data/valid_corpus.txt", Config)

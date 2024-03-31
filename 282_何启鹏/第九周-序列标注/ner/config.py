@@ -5,9 +5,9 @@
 """
 
 Config = {
-    "bert_requires_grad": False,
+    "bert_requires_grad": True,
     "path_log_loss":"model_output/loss_file/bert",
-    "use_bert": False,
+    "use_bert": True,
     "pretrain_model_path": r"E:\data\hub\bert_base_chinese",
     "vocab_path": r"E:\data\hub\bert_base_chinese\vocab.txt",
     "model_path": "model_output",

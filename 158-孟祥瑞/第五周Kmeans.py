@@ -84,7 +84,7 @@ def main():
         sentences = sentence_label_dict[label]
         for i in range(min(10, len(sentences))):
             print(sentences[i].replace(" ", ""))
-        print("---------")
+        print("----------")
 
 
 if __name__ == '__main__':

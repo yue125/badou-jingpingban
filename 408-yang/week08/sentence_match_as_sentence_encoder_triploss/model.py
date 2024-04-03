@@ -77,7 +77,7 @@ if __name__ == "__main__":
     from config import config       
     config["vocab_size"] = 10
     config["max_length"] = 4
-    model = SiameseNetWork(config)
+    model = SiameseTripNetWork(config)
     s1 = torch.LongTensor([[1,2,3,0],[2,2,0,0]])
     print(f"s1 shape:{s1.shape}")
     s2 = torch.LongTensor([[1,2,3,4],[3,2,3,4]])

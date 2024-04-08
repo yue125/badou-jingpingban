@@ -29,11 +29,19 @@ class LanguageModel(nn.Module):
 
     def forward(self, x, y=None):
         if self.config["model"] == "bert":
-            x_encoder, _ = self.encoder(x)  # batch_size, seq_len, hidden_size(768)
+            if y is not None:
+                # mask应该是和x同维度的吗？
+                mask = torch.tril(torch.ones((x.shape[0], x.shape[1])))
+                mask = mask.to(x.device)
+                x_encoder, _ = self.encoder(x, attention_mask=mask)  # batch_size, seq_len, hidden_size(768)
+            else:
+                x_encoder, _ = self.encoder(x)  # batch_size, seq_len, hidden_size(768)
         else:
             x_embedded = self.embedding(x)
             x_encoder, _ = self.encoder(x_embedded)
+            
         pred = self.classify(x_encoder)  # batch_size, seq_len, vocab_size
+        
         if y is not None:
             pred_view = pred.view(-1, pred.shape[-1])
             y_view = y.view(-1)

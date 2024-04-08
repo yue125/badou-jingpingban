@@ -22,7 +22,7 @@ def sampling_strategy(prob_distribution):
 class Prediction:
     def __init__(self, config, weights_path):
         self.config = config
-        self.vocab = load_vocab(config["vocab_path"])
+        self.vocab = load_vocab(config["bert_vocab_path"])
         self.reverse_vocab = {v: k for k, v in self.vocab.items()}
         self.config["vocab_size"] = len(self.vocab)
         self.window_size = self.config["window_size"]

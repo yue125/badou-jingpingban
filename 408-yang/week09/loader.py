@@ -35,7 +35,7 @@ class DataGenerator:
             segments = f.read().split("\n\n")
             for segment in segments:
                 sentence = []
-                labels = []
+                labels = [8] #cls_token
                 for line in segment.split("\n"):
                     if line.strip() =="":
                         continue

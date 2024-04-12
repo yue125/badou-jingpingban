@@ -126,7 +126,7 @@ def train(corpus_path, save_weight=True):
     vocab_size = 21128  # 字表大小
     learning_rate = 0.001  # 学习率
 
-    pretrain_model_path = r'C:\Users\28194\PycharmProjects\pythonProject2\week6\week6 语言模型和预训练\下午\bert-base-chinese'
+    pretrain_model_path = r'E:\work_space\pretrain_models\bert-base-chinese'
     tokenizer = BertTokenizer.from_pretrained(pretrain_model_path)
 
     title, content = load_corpus(corpus_path)  # 加载语料
@@ -164,4 +164,4 @@ def train(corpus_path, save_weight=True):
 if __name__ == "__main__":
     # build_vocab_from_corpus("corpus/all.txt")
     # train("corpus.txt", False)
-    train("sample_data.json", False)
+    train("../../0-宋学林/week11/sample_data.json", False)

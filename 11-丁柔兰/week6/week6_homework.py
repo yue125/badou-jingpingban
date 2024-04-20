@@ -41,19 +41,6 @@ token_type_ids_tensor = torch.tensor(token_type_ids, dtype=torch.long)
 embedded_input = word_embedding(input_ids_tensor) + position_embedding(position_ids_tensor) + token_type_embedding(
     token_type_ids_tensor)
 
-# 定义位置索引
-position_ids = torch.arange(len(input_ids))
-
-# 定义token类型索引, 假设为单句子输入
-token_type_ids = torch.zeros(len(input_ids), dtype=torch.long)
-
-# 转换为PyTorch的Tensor
-input_ids_tensor = torch.tensor(input_ids, dtype=torch.long)
-position_ids_tensor = torch.tensor(position_ids, dtype=torch.long)
-token_type_ids_tensor = torch.tensor(token_type_ids, dtype=torch.long)
-# 执行嵌入操作
-embedded_input = word_embedding[input_ids] + position_embedding[position_ids] + token_type_embedding[token_type_ids]
-
 # -------------------------------------------------------执行LayerNormalization和线性层变换的前置操作：分割线头-------------------------------------------------------
 # 定义层归一化
 layer_norm = nn.LayerNorm(hidden_size)

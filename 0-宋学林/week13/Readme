@@ -1,4 +1,5 @@
-使用本代码中的配置，bert选用6层，在当前数据上的日志如下：
+使用bert+lora的方式进行ner任务训练
+使用本代码中的配置(学习率1e-3, epoch 5)，bert选用6层，在week9 ner/ner_data文件夹的训练数据上的日志如下：
 
 2024-04-28 15:15:25,233 - __main__ - INFO - epoch 1 begin
 We strongly recommend passing in an `attention_mask` since your input_ids may be padded. See https://huggingface.co/docs/transformers/troubleshooting#incorrect-output-when-padding-tokens-arent-masked.

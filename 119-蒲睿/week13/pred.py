@@ -69,7 +69,5 @@ def decode(labels, sentence):
 decode(pred_label, sentence)
 for k, v in mapping.items():
     print(k,v)
-# evaluator = Evaluator(Config, model, logger)
-# evaluator.eval(0)
 
 
